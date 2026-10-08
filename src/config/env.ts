@@ -2,7 +2,8 @@ import Constants from "expo-constants";
 
 /*
  * The app's configuration. Everything in the app bundle is public, so nothing here is a secret.
- * The variant comes from app.config.ts (APP_VARIANT); the API address from EXPO_PUBLIC_API_URL.
+ * The variant comes from app.config.ts (APP_VARIANT); the API address from EXPO_PUBLIC_API_URL, and the
+ * website's from EXPO_PUBLIC_WEB_URL.
  */
 
 export type AppVariant = "development" | "preview" | "production";
@@ -17,26 +18,34 @@ function readVariant(): AppVariant {
   return VARIANTS.find((variant) => variant === value) ?? "development";
 }
 
-function readApiUrl(variant: AppVariant): string {
-  const configured = process.env.EXPO_PUBLIC_API_URL;
-  const url = (configured || (variant === "development" ? DEVELOPMENT_API_URL : "")).replace(
-    /\/+$/,
-    "",
-  );
+/** An origin from the configuration, without a trailing slash, checked for the variant. */
+function readOrigin(name: string, configured: string, variant: AppVariant): string {
+  const url = configured.replace(/\/+$/, "");
   if (!/^https?:\/\/[^/]+/.test(url)) {
-    throw new Error("EXPO_PUBLIC_API_URL must be the API's address, such as https://example.com.");
+    throw new Error(`${name} must be an address, such as https://example.com.`);
   }
   // Tokens travel in request bodies and headers: outside development they only go over HTTPS.
   if (variant !== "development" && !url.startsWith("https://")) {
-    throw new Error("Preview and production builds must use an https:// API address.");
+    throw new Error(`Preview and production builds must use an https:// ${name}.`);
   }
   return url;
 }
 
 const variant = readVariant();
 
-export const env: { apiUrl: string; variant: AppVariant } = {
+const apiUrl = readOrigin(
+  "EXPO_PUBLIC_API_URL",
+  process.env.EXPO_PUBLIC_API_URL || (variant === "development" ? DEVELOPMENT_API_URL : ""),
+  variant,
+);
+
+export const env: { apiUrl: string; webUrl: string; variant: AppVariant } = {
   /** The API's origin, without "/api". */
-  apiUrl: readApiUrl(variant),
+  apiUrl,
+  /**
+   * The website, where invitations and password resets are completed (their emailed links open it). In
+   * production the website and the API are served from one site, so it defaults to the API's address.
+   */
+  webUrl: readOrigin("EXPO_PUBLIC_WEB_URL", process.env.EXPO_PUBLIC_WEB_URL || apiUrl, variant),
   variant,
 };
