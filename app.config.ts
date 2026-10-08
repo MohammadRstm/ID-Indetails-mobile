@@ -90,6 +90,17 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
       "expo-sqlite",
       "expo-font",
+      // iOS 17+ asks only to add events; older iOS and Android ask for calendar access.
+      [
+        "expo-calendar",
+        {
+          writeOnlyAccess: true,
+          writeOnlyCalendarPermission:
+            "Allow ID InDetails to add meetings and deadlines to your calendar.",
+          calendarPermission: "Allow ID InDetails to add meetings and deadlines to your calendar.",
+          remindersPermission: false,
+        },
+      ],
     ],
     experiments: {
       reactCompiler: true,
