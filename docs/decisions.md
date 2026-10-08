@@ -19,3 +19,4 @@ Where the approval didn't answer a question, the plan's proposed default applies
 | 11 | Biometric relock | After 5 minutes in the background (**default**) |
 | 12 | Theme | Follow the phone's light/dark setting by default, with Light / Dark / System in the app (**default**) |
 | 13 | Material receipts | Not built (see 2) |
+| 14 | Timer on sign-out | Keep a stopped but not-yet-logged timer run for that person, so their time isn't lost (decided 8 Oct 2026; the plan's "clear the timer" no longer applies to unlogged runs) |
