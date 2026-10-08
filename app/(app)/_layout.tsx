@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useSession } from "@/auth/session";
 import { useCompanySettings } from "@/features/settings/api";
 import { BootScreen } from "@/features/shell/screens/BootScreen";
+import { SignedInServices } from "@/live/SignedInServices";
 import { screenKeyForSegments } from "@/navigation/routeKey";
 import { permissionsOf } from "@/permissions/permissions";
 import { canOpen } from "@/permissions/screens";
@@ -28,5 +29,10 @@ export default function AppLayout() {
   const key = screenKeyForSegments(segments);
   if (key && !canOpen(perms, key)) return <Redirect href="/not-available" />;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <>
+      <SignedInServices />
+      <Stack screenOptions={{ headerShown: false }} />
+    </>
+  );
 }
