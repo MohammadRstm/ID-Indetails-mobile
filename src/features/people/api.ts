@@ -50,7 +50,8 @@ export function useEmployees(params: EmployeeListParams, enabled = true) {
   return useQuery({
     queryKey: employeeKeys.list(p),
     queryFn: async () =>
-      (await http.get<Paged<EmployeeSummary>>("/employees", { params: p })).data.items,
+      (await http.get<Paged<EmployeeSummary>>("/employees", { params: p })).data,
+    select: (page) => page.items,
     placeholderData: keepPreviousData,
     enabled,
   });
@@ -93,7 +94,8 @@ export function useRecentEntries(id: number, enabled: boolean) {
         await http.get<Paged<WorkEntry>>("/work-entries", {
           params: { userId: id, page: 1, pageSize: RECENT_ENTRIES },
         })
-      ).data.items,
+      ).data,
+    select: (page) => page.items,
     enabled,
   });
 }

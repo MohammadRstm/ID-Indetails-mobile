@@ -52,7 +52,8 @@ export function useRecentActivity(filters: FeedFilters, count: number, enabled =
         await http.get<Paged<ActivityItem>>("/activity", {
           params: { ...params, page: 1, pageSize: count },
         })
-      ).data.items,
+      ).data,
+    select: (page) => page.items,
     enabled,
   });
 }
