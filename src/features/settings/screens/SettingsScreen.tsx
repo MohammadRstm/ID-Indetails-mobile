@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Platform } from "react-native";
 import { unlockName } from "@/auth/lock/biometrics";
 import { useLock } from "@/auth/lock/LockProvider";
-import { useSession } from "@/auth/session";
+import { useUnsentRecordsGuard } from "@/offline/signOutGuard";
 import { canOpen } from "@/permissions/screens";
 import { usePermissions } from "@/permissions/usePermissions";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -14,7 +14,7 @@ import { SettingsView, type LockSetting } from "../components/SettingsView";
 /** This phone's settings: the theme, the lock, links to the account's other settings, and signing out. */
 export function SettingsScreen() {
   const { preference, setPreference } = useTheme();
-  const { signOut } = useSession();
+  const { signOut, dialog } = useUnsentRecordsGuard();
   const lock = useLock();
   const perms = usePermissions();
   const [lockBusy, setLockBusy] = useState(false);
@@ -69,6 +69,7 @@ export function SettingsScreen() {
         }}
         signingOut={signingOut}
       />
+      {dialog}
     </Screen>
   );
 }

@@ -1,6 +1,7 @@
 import { router, type Href } from "expo-router";
 import { useState } from "react";
 import { useSession } from "@/auth/session";
+import { useUnsentRecordsGuard } from "@/offline/signOutGuard";
 import { usePermissions } from "@/permissions/usePermissions";
 import {
   canOpen,
@@ -16,7 +17,8 @@ const KEYS = Object.keys(screens) as ScreenKey[];
 /** Everything that isn't a tab: the person's other screens, settings, and signing out. */
 export function MoreScreen() {
   const perms = usePermissions();
-  const { user, signOut } = useSession();
+  const { user } = useSession();
+  const { signOut, dialog } = useUnsentRecordsGuard();
   const [confirming, setConfirming] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -74,6 +76,7 @@ export function MoreScreen() {
           await signOut();
         }}
       />
+      {dialog}
     </Screen>
   );
 }
