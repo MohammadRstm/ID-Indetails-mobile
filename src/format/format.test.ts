@@ -1,0 +1,155 @@
+import { money } from "./money";
+import { periodRange } from "./periods";
+import { joinPhone, splitPhone } from "./phone";
+import {
+  addDays,
+  compactNumber,
+  companyTimeToUtc,
+  companyToday,
+  dayKey,
+  daysBetween,
+  fmtDate,
+  fmtDateY,
+  fmtDayDate,
+  fmtDur,
+  fmtDurShort,
+  fmtH,
+  fmtMinutes,
+  fmtMonthY,
+  fmtRange,
+  fmtTime,
+  minutesOfDay,
+  relDay,
+  relTime,
+  setFormatSettings,
+  startOfWeek,
+} from "./time";
+
+// The web's format tests, run with the process in another time zone (jest.config.js sets TZ), so every
+// result here comes from the company's time zone and never the phone's.
+afterEach(() => setFormatSettings({ timeZone: "Asia/Beirut", use24HourTime: false, weekStart: 1 }));
+
+describe("the test process", () => {
+  it("runs in a time zone other than the company's", () => {
+    // Los Angeles is UTC-7 on this date; Beirut is UTC+3.
+    expect(new Date("2026-09-30T12:00:00Z").getTimezoneOffset()).toBe(420);
+  });
+});
+
+describe("dates and times", () => {
+  it("shows instants in the company time zone and calendar days as they are", () => {
+    // 21:30 UTC on 30 Sep is already 1 October in Beirut (UTC+3 in summer), and still 30 Sep on the device.
+    const late = "2026-09-30T21:30:00Z";
+    expect(dayKey(late)).toBe("2026-10-01");
+    expect(fmtTime(late)).toBe("12:30 AM");
+    expect(fmtDateY("2026-09-30")).toBe("Sep 30, 2026");
+    expect(fmtDayDate("2026-09-30")).toBe("Wed, Sep 30");
+  });
+
+  it("takes today from the company's calendar, not the device's", () => {
+    // 22:30 UTC on 30 Sep: still 30 Sep in Los Angeles, 1 Oct in Beirut.
+    expect(companyToday(new Date("2026-09-30T22:30:00Z"))).toBe("2026-10-01");
+  });
+
+  it("follows the company's 24-hour setting", () => {
+    setFormatSettings({ use24HourTime: true });
+    expect(fmtRange("2026-09-30T06:00:00Z", "2026-09-30T08:15:00Z")).toBe("09:00 → 11:15");
+    expect(fmtMinutes(13 * 60 + 5)).toBe("13:05");
+  });
+
+  it("follows a different company time zone", () => {
+    setFormatSettings({ timeZone: "Europe/London" });
+    expect(fmtTime("2026-09-30T21:30:00Z")).toBe("10:30 PM");
+    expect(dayKey("2026-09-30T21:30:00Z")).toBe("2026-09-30");
+  });
+
+  it("turns a company wall-clock time into the UTC instant the API stores", () => {
+    expect(companyTimeToUtc("2026-09-30", 9 * 60 + 30).toISOString()).toBe(
+      "2026-09-30T06:30:00.000Z",
+    );
+    // Beirut is UTC+2 in winter.
+    expect(companyTimeToUtc("2026-12-01", 9 * 60).toISOString()).toBe("2026-12-01T07:00:00.000Z");
+    expect(minutesOfDay("2026-09-30T06:30:00Z")).toBe(9 * 60 + 30);
+  });
+
+  it("writes durations like the web", () => {
+    expect(fmtDur(45)).toBe("45m");
+    expect(fmtDur(65)).toBe("1h 05m");
+    expect(fmtDurShort(120)).toBe("2h");
+    expect(fmtH(7 * 60 + 30)).toBe("7h 30m");
+    expect(fmtH(1240 * 60)).toBe("1,240h");
+  });
+
+  it("does calendar arithmetic on day keys", () => {
+    expect(addDays("2026-09-30", 1)).toBe("2026-10-01");
+    expect(daysBetween("2026-09-28", "2026-10-02")).toBe(4);
+    expect(startOfWeek("2026-09-30")).toBe("2026-09-28");
+    setFormatSettings({ weekStart: 0 });
+    expect(startOfWeek("2026-09-30")).toBe("2026-09-27");
+    expect(fmtMonthY("2026-09")).toBe("September 2026");
+    expect(fmtDate("2026-01-05")).toBe("Jan 5");
+  });
+
+  it("says how long ago something happened", () => {
+    const now = new Date("2026-09-30T12:00:00Z");
+    expect(relTime("2026-09-30T11:59:40Z", now)).toBe("just now");
+    expect(relTime("2026-09-30T09:00:00Z", now)).toBe("3 hours ago");
+    expect(relTime("2026-09-29T10:00:00Z", now)).toBe("yesterday");
+    expect(relDay("2026-09-30T08:00:00Z", now)).toBe("Today");
+    expect(relDay("2026-09-29T08:00:00Z", now)).toBe("Yesterday");
+  });
+});
+
+describe("money", () => {
+  it("is short on screen and exact in full", () => {
+    expect(money.fmt(950)).toBe("$950");
+    expect(money.fmt(9600)).toBe("$9.6k");
+    expect(money.fmt(1_250_000)).toBe("$1.25M");
+    expect(money.fmt(-4200)).toBe("−$4.2k");
+    expect(money.fmt(2_600_000_000, "LBP")).toBe("2.6B LBP");
+    expect(money.exact(12500)).toBe("$12,500");
+    expect(money.exact(1250.5, "USD", { cents: true })).toBe("$1,250.5");
+    expect(money.exact(-300, "USD", { paren: true })).toBe("($300)");
+    expect(money.short(12_345)).toBe("$12k");
+    expect(money.pct(0.125)).toBe("12.5%");
+    expect(money.pct(null)).toBe("-");
+  });
+
+  it("moves to the next unit instead of writing 1000k", () => {
+    expect(compactNumber(999_999)).toBe("1M");
+  });
+});
+
+describe("periods", () => {
+  it("builds this month against the same stretch of the month before", () => {
+    const month = periodRange("month", "2026-10-08");
+    expect(month).toMatchObject({
+      from: "2026-10-01",
+      to: "2026-10-08",
+      label: "October 2026",
+      prevFrom: "2026-09-01",
+      prevTo: "2026-09-08",
+    });
+  });
+
+  it("builds the quarter to date", () => {
+    expect(periodRange("quarter", "2026-10-08")).toMatchObject({
+      from: "2026-10-01",
+      label: "Q4 2026 to date",
+      prevLabel: "Q3 2026",
+    });
+  });
+});
+
+describe("phone numbers", () => {
+  it("splits a stored number into its country and the rest", () => {
+    expect(splitPhone("+961 3 555 142")).toEqual({ iso: "LB", local: "3 555 142" });
+    expect(splitPhone("+1 212 555 0100")).toEqual({ iso: "US", local: "212 555 0100" });
+    expect(splitPhone("03 555 142")).toEqual({ iso: "LB", local: "03 555 142" });
+  });
+
+  it("keeps an empty number empty whatever the country", () => {
+    expect(joinPhone("LB", "3 555 142")).toBe("+961 3 555 142");
+    expect(joinPhone("LB", "  ")).toBe("");
+  });
+});
