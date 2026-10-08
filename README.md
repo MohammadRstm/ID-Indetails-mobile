@@ -42,5 +42,7 @@ Builds for other people go through EAS (`eas.json`: `development`, `preview`, `p
 | Phase 0: architecture and implementation plan | [docs/phase-0-plan.md](docs/phase-0-plan.md) |
 | The answers to the plan's open questions | [docs/decisions.md](docs/decisions.md) |
 | The contracts the phases build against | [docs/contracts.md](docs/contracts.md) |
+| What the phone does for Design employees and Execution site staff | [docs/employee-and-site-staff.md](docs/employee-and-site-staff.md) |
+| The phone-only enhancements (widgets, lock-screen timer, background sync, notification actions) | [docs/native-features.md](docs/native-features.md) |
 | Modules copied from the web client, and their sources | [docs/ported-from-web.md](docs/ported-from-web.md) |
 | Rules for working on this code | [CLAUDE.md](CLAUDE.md) |

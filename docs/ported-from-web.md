@@ -37,3 +37,4 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/ui/charts/core.ts` | `src/shared/components/Charts/core.ts` | The drawing helpers only (`barPath`, `niceMax`, `clamp`) |
 | `src/ui/charts/DayRuler.tsx` | `src/shared/components/Charts/DayRuler.tsx` | No hover tooltip |
 | `test/personas.ts` | `src/test/personas.ts` | Adds `customGrants`, a Design employee who also records materials |
+| `src/features/notifications/words.ts` | `src/domains/shared/notifications/notificationWords.ts` | The web's words; each notification names its target instead of a web address, which the phone opens if the reader's permissions allow |
