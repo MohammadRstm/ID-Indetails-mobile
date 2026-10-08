@@ -1,0 +1,150 @@
+/*
+ * The web's design tokens (src/styles/hourline.css in the web client), values verbatim.
+ * Components use them by name through useTheme(); nothing hard-codes a colour or a radius.
+ */
+
+export const light = {
+  ground: "#F2F5F4",
+  surface: "#FFFFFF",
+  surface2: "#F7FAF9",
+  surface3: "#EDF1F0",
+  ink: "#111819",
+  ink2: "#4A5553",
+  ink3: "#697572",
+  line: "#E2E7E5",
+  line2: "#CED6D3",
+  accent: "#0C6B69",
+  accent2: "#095957",
+  accentSoft: "#DDEFEC",
+  accentInk: "#0A5654",
+  onAccent: "#FFFFFF",
+  now: "#D9432E",
+  nowSoft: "#FBE7E2",
+  ok: "#178A4B",
+  okSoft: "#E4F3EA",
+  warn: "#86560A",
+  warnSoft: "#FBEFD6",
+  warnMark: "#C58200",
+  done: "#3F4B63",
+  doneSoft: "#ECEFF5",
+  arch: "#6B7774",
+  archSoft: "#EFF2F1",
+  heat0: "#EDF1F0",
+  heat1: "#7CC3B7",
+  heat2: "#46A596",
+  heat3: "#1E8378",
+  heat4: "#0C5F59",
+  onLv1: "#0E2422",
+  onLv2: "#04211E",
+  onLv3: "#FFFFFF",
+  onLv4: "#FFFFFF",
+  chart: "#13807A",
+  chartSoft: "rgba(19,128,122,.12)",
+  ghost: "#A3AFAB",
+  ghostSoft: "#E7ECEA",
+  grid: "#E7ECEA",
+  axis: "#CED6D3",
+  cost: "#8A9693",
+  cost2: "#B8C2BF",
+  profit: "#178A4B",
+  loss: "#C2402C",
+  /** `--ring`: the gap drawn around stacked avatars and presence dots. */
+  ring: "#FFFFFF",
+  scrim: "rgba(9,15,16,.45)",
+  drawerScrim: "rgba(9,15,16,.4)",
+  mediaScrim: "rgba(4,7,8,.86)",
+  shadow1: "0 1px 2px rgba(16,25,26,.05)",
+  shadow2: "0 10px 30px -12px rgba(16,25,26,.22), 0 2px 8px rgba(16,25,26,.06)",
+  shadow3: "0 24px 60px -18px rgba(16,25,26,.32), 0 4px 12px rgba(16,25,26,.08)",
+};
+
+export type Colors = typeof light;
+export type ColorName = keyof Colors;
+
+export const dark: Colors = {
+  ground: "#0B1011",
+  surface: "#131A1B",
+  surface2: "#182122",
+  surface3: "#1E2829",
+  ink: "#E6EDEB",
+  ink2: "#A7B3B0",
+  ink3: "#7B8986",
+  line: "#243032",
+  line2: "#33403F",
+  accent: "#36B0A6",
+  accent2: "#4CC3B8",
+  accentSoft: "rgba(54,176,166,.16)",
+  accentInk: "#5CC7BC",
+  onAccent: "#04201E",
+  now: "#FF6B57",
+  nowSoft: "rgba(255,107,87,.16)",
+  ok: "#34C377",
+  okSoft: "rgba(52,195,119,.14)",
+  warn: "#F2C063",
+  warnSoft: "rgba(242,192,99,.14)",
+  warnMark: "#E0A63F",
+  done: "#B7C2DA",
+  doneSoft: "rgba(183,194,218,.13)",
+  arch: "#8B9895",
+  archSoft: "rgba(139,152,149,.13)",
+  heat0: "#1B2527",
+  heat1: "#1F5A55",
+  heat2: "#24817A",
+  heat3: "#3AAA9F",
+  heat4: "#7AD6CB",
+  onLv1: "#CFE8E4",
+  onLv2: "#EAF7F5",
+  onLv3: "#06201E",
+  onLv4: "#06201E",
+  chart: "#3DB5AB",
+  chartSoft: "rgba(61,181,171,.16)",
+  ghost: "#4A5856",
+  ghostSoft: "#212C2D",
+  grid: "#1F292B",
+  axis: "#33403F",
+  cost: "#5E6C6A",
+  cost2: "#3C4847",
+  profit: "#34C377",
+  loss: "#FF7A66",
+  ring: "#131A1B",
+  scrim: "rgba(9,15,16,.45)",
+  drawerScrim: "rgba(9,15,16,.4)",
+  mediaScrim: "rgba(4,7,8,.86)",
+  shadow1: "0 1px 2px rgba(0,0,0,.4)",
+  shadow2: "0 10px 30px -12px rgba(0,0,0,.7), 0 2px 8px rgba(0,0,0,.35)",
+  shadow3: "0 24px 60px -18px rgba(0,0,0,.8), 0 4px 12px rgba(0,0,0,.4)",
+};
+
+/** `--r1` buttons, `--r2` cards and toasts, `--r3` modals and sheets; inputs 8; pills fully round. */
+export const radii = {
+  r1: 6,
+  input: 8,
+  r2: 9,
+  r3: 14,
+  pill: 999,
+};
+
+/**
+ * The web has no spacing scale; these are the gaps it uses (8 small, 10 between rows, 14 between sections and
+ * inside panels), plus the 44pt minimum touch target the phone adds.
+ */
+export const spacing = {
+  xxs: 2,
+  xs: 4,
+  s: 6,
+  m: 8,
+  row: 10,
+  l: 14,
+  xl: 18,
+  xxl: 24,
+  xxxl: 32,
+  touch: 44,
+};
+
+/** The web's motion, in milliseconds: colour changes, modals rising, drawers sliding, toasts. */
+export const motion = {
+  fast: 120,
+  rise: 140,
+  slide: 160,
+  toast: 240,
+};
