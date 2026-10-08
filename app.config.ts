@@ -101,6 +101,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           remindersPermission: false,
         },
       ],
+      // iOS background processing for the outbox sync (src/offline/background.ts).
+      "expo-background-task",
     ],
     experiments: {
       reactCompiler: true,
