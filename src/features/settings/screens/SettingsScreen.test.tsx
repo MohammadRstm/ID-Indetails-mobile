@@ -10,6 +10,7 @@ import { SettingsScreen } from "./SettingsScreen";
 jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
 }));
+jest.mock("expo-sqlite", () => jest.requireActual("@/offline/testing/fakeSqlite"));
 jest.mock("@/auth/lock/biometrics", () => ({
   ...jest.requireActual("@/auth/lock/biometrics"),
   lockSupport: jest.fn(),
