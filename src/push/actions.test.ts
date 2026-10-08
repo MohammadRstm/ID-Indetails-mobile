@@ -85,7 +85,9 @@ describe("Mark done", () => {
 describe("Reply", () => {
   it("sends the typed text to the team chat", async () => {
     const posts = recordPosts();
-    await expect(handleNotificationAction("reply", teamMessage, "  On my way  ")).resolves.toBe(true);
+    await expect(handleNotificationAction("reply", teamMessage, "  On my way  ")).resolves.toBe(
+      true,
+    );
     expect(posts).toEqual([{ path: "/api/messages/teams/2", body: { body: "On my way" } }]);
   });
 

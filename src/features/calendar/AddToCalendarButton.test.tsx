@@ -120,7 +120,10 @@ describe("AddToCalendarButton on Android", () => {
 
     expect(await screen.findByText("Added to your calendar")).toBeTruthy();
     expect(mocked.createCalendar).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "ID InDetails", source: expect.objectContaining({ isLocalAccount: true }) }),
+      expect.objectContaining({
+        title: "ID InDetails",
+        source: expect.objectContaining({ isLocalAccount: true }),
+      }),
     );
     expect(createEvent).toHaveBeenCalledTimes(1);
   });

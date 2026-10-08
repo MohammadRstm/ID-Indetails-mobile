@@ -28,7 +28,10 @@ describe("categoryForPush", () => {
   it("gives no buttons to a requirement already done, or one without its requirement target", () => {
     expect(categoryForPush({ kind: "requirement_done", target: requirement })).toBeNull();
     expect(
-      categoryForPush({ kind: "requirement_assigned", target: { type: "page", page: "notifications" } }),
+      categoryForPush({
+        kind: "requirement_assigned",
+        target: { type: "page", page: "notifications" },
+      }),
     ).toBeNull();
   });
 
@@ -39,8 +42,12 @@ describe("categoryForPush", () => {
   });
 
   it("gives every other push no buttons", () => {
-    expect(categoryForPush({ kind: "work_logged", target: { type: "work_entry", id: 3 } })).toBeNull();
-    expect(categoryForPush({ kind: "log_reminder", target: { type: "page", page: "work" } })).toBeNull();
+    expect(
+      categoryForPush({ kind: "work_logged", target: { type: "work_entry", id: 3 } }),
+    ).toBeNull();
+    expect(
+      categoryForPush({ kind: "log_reminder", target: { type: "page", page: "work" } }),
+    ).toBeNull();
   });
 });
 

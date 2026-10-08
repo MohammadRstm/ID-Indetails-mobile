@@ -26,7 +26,11 @@ describe("toEventDetails", () => {
   });
 
   it("makes a timed event without an end a point in time, and never ends before it starts", () => {
-    const noEnd = toEventDetails({ title: "x", startsAt: "2026-10-12T07:00:00Z" }, "android", BEIRUT);
+    const noEnd = toEventDetails(
+      { title: "x", startsAt: "2026-10-12T07:00:00Z" },
+      "android",
+      BEIRUT,
+    );
     expect(noEnd?.endDate).toEqual(new Date("2026-10-12T07:00:00Z"));
     const backwards = toEventDetails(
       { title: "x", startsAt: "2026-10-12T07:00:00Z", endsAt: "2026-10-12T06:00:00Z" },
@@ -82,7 +86,9 @@ describe("toEventDetails", () => {
 
   it("refuses a start that isn't a date or time", () => {
     expect(toEventDetails({ title: "x", startsAt: "soon" }, "ios", BEIRUT)).toBeNull();
-    expect(toEventDetails({ title: "x", startsAt: "soon", allDay: true }, "ios", BEIRUT)).toBeNull();
+    expect(
+      toEventDetails({ title: "x", startsAt: "soon", allDay: true }, "ios", BEIRUT),
+    ).toBeNull();
   });
 });
 
