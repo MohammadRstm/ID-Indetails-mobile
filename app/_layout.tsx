@@ -10,6 +10,7 @@ import { queryClient } from "@/api/queryClient";
 import { LockOverlay } from "@/auth/lock/LockOverlay";
 import { LockProvider } from "@/auth/lock/LockProvider";
 import { SessionProvider } from "@/auth/session";
+import { registerWidgets } from "@/features/widgets";
 import { fontAssets } from "@/theme/fonts";
 import { ThemeProvider, useTheme } from "@/theme/ThemeProvider";
 import { ToastHost } from "@/ui";
@@ -23,6 +24,10 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(fontAssets);
   // A font that fails to load leaves the system font in its place; the app still opens.
   const ready = fontsLoaded || fontError != null;
+
+  useEffect(() => {
+    void registerWidgets();
+  }, []);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});

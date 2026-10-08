@@ -1,11 +1,12 @@
 import * as Notifications from "expo-notifications";
 import { onSignOut } from "@/auth/signOutCleanup";
 import { clearTimerNotification } from "@/features/timer/notifications";
+import { clearWidgets } from "@/features/widgets";
 import { clearPersistedQueries } from "@/offline/persistence";
 
 /*
  * What this phone keeps for the signed-in person besides what the session clears itself (queries, toasts, images):
- * their kept queries, the badge and the timer's notification. Registered once with onSignOut, so it runs for
+ * their kept queries, the badge, the timer's notification and the home-screen widgets. Registered once with onSignOut, so it runs for
  * every way out: signing out, the lock's Sign out, and a session the API ended. The timer's own state stays under
  * the person's key for when they return.
  */
@@ -24,5 +25,6 @@ onSignOut(async () => {
     userId == null ? Promise.resolve() : clearPersistedQueries(userId),
     Notifications.setBadgeCountAsync(0),
     clearTimerNotification(),
+    clearWidgets(),
   ]);
 });

@@ -1,10 +1,13 @@
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { toApiError } from "@/api/errors";
 import { useCurrentUser } from "@/auth/session";
 import { MeetingRow } from "@/features/meetings/components/MeetingRow";
 import { MyRequirementRow } from "@/features/requirements/components/MyRequirementRow";
 import { useMyRequirements } from "@/features/requirements/api";
+import { useTimerState } from "@/features/timer/store";
 import { TimerPanel } from "@/features/timer/screens/TimerPanel";
+import { publishTodayHours } from "@/features/widgets";
 import { useMyDay, useMySchedule, useMyWorkSummary } from "@/features/work/api";
 import { requestLogWork } from "@/features/work/logWorkRequest";
 import { companyToday, fmtDayDateY } from "@/format/time";
@@ -40,6 +43,15 @@ export function DesignTodayScreen() {
   const summary = useMyWorkSummary(logs);
   const requirements = useMyRequirements(perms.has(P.REQUIREMENT_VIEW));
   const banner = useOfflineBanner(day.dataUpdatedAt);
+
+  // The home-screen widgets show today's hours, so they are told whenever this screen learns them.
+  const loggedMinutes = schedule.data?.day.loggedMinutes;
+  const timerRunning = useTimerState(me.id).running !== null;
+  useEffect(() => {
+    if (loggedMinutes !== undefined) {
+      void publishTodayHours({ day: today, minutes: loggedMinutes, timerRunning });
+    }
+  }, [today, loggedMinutes, timerRunning]);
 
   const deadlines = (requirements.data?.items ?? []).filter((r) => r.deadline).slice(0, 3);
   const meetings = day.data?.meetings ?? [];
