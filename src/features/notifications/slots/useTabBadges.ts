@@ -1,10 +1,15 @@
+import { useMessagesBadge } from "@/features/messages/api";
+import { useUnreadCount } from "../api";
+
 /** The red counts on the Alerts and Messages tabs. */
 export type TabBadges = { alerts?: number; messages?: number };
 
 /**
- * Slot: the tab bar (Phase 1a/1b) reads the counts here; Phase 2 fills it with the unread notifications and
- * messages. Until then, no badges.
+ * The tab bar's counts: unread notifications and unread messages. The live connection and pushes reload them;
+ * coming back to the app does too.
  */
 export function useTabBadges(): TabBadges {
-  return {};
+  const alerts = useUnreadCount();
+  const messages = useMessagesBadge();
+  return { alerts: alerts.data, messages: messages.data?.unread };
 }
