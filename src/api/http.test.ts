@@ -56,6 +56,27 @@ describe("http", () => {
     expect(secureStoreItems.get(REFRESH_TOKEN_KEY)).toBe("r2");
   });
 
+  it("repeats a request refused after another refresh finished, without refreshing again", async () => {
+    await tokenManager.setSession(authResponse({ accessToken: "old", refreshToken: "r1" }));
+    let refreshes = 0;
+    server.use(
+      mock.post(api("/mobile/auth/refresh"), () => {
+        refreshes++;
+        return HttpResponse.json(authResponse({ accessToken: "new", refreshToken: "r2" }));
+      }),
+      // The slow request leaves with the old token and is refused only after the refresh is done.
+      mock.get(api("/slow"), async ({ request }) => {
+        const header = request.headers.get("Authorization");
+        if (header === "Bearer new") return HttpResponse.json({ ok: true });
+        await tokenManager.refresh();
+        return HttpResponse.json({ code: "unauthenticated" }, { status: 401 });
+      }),
+    );
+
+    await expect(http.get("/slow")).resolves.toMatchObject({ data: { ok: true } });
+    expect(refreshes).toBe(1);
+  });
+
   it("fails with 401 and ends the session when the refresh is refused", async () => {
     await tokenManager.setSession(authResponse({ accessToken: "old" }));
     protectedThing("new");
