@@ -270,3 +270,22 @@ The laptop is shared with other Claude sessions and overheats. Every heavy comma
    - Never run a type check, lint and tests at the same time.
 4. **API integration tests** use a MySQL test database shared with another session, and every run drops it. Only run them filtered (`--filter`), and only when nothing else is testing. If unsure, don't run them; say so in the report, and the orchestrator runs them.
 5. **Never** apply migrations to the development database, run `dotnet ef database update`, or start long-running servers.
+
+## 9. Settled after Phase 1a and the API branch
+
+- **Slot `src/features/notifications/slots/useTabBadges.ts`** (owner 2): returns `{ alerts?, messages? }`, which the tab bar reads for its counts.
+- **`src/features/requirements/manage/**`** belongs to Phase 3 (the requirement editor).
+- **Rate limiting** answers type `rate_limited` with code `too_many_requests`.
+- **Labour `version`** is `"0"` until reported, then the time of the last change in milliseconds. A changed week answers `409 labour_week_changed`.
+- **Devices:** registering from a web token answers `403`; from an ended session, `401`.
+- **Materials:** a `clientRef` already used on another site, or twice in one batch, answers `400`.
+- **Quiet hours:** a start equal to the end answers `400`.
+- **Mobile change-password** keeps the phone's session id, so its push device stays registered.
+- **Throttled digest pushes** have null title and body; they only update the badge.
+- **Shared module additions from Phase 1a** (see its report, now in `README.md`/`docs/ported-from-web.md`):
+  - `ApiError.type` and `.isNetwork`;
+  - `tokenManager.setSession`, `.getRefreshToken`, `.clearSession`;
+  - `createQueryClient`, `clearToasts`, `dismissToast`;
+  - `toast({ text, sub?, icon?, actionLabel?, action?, duration? })`;
+  - `renderWithProviders` is async.
+- **Screen props** are fixed by the route files (`ProjectScreen { projectId, section }`, `ProjectRequirementsScreen { projectId, highlightRequirementId }`, …). Keep the names and props of the placeholder you replace.
