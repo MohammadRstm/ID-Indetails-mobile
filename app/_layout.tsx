@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { queryClient } from "@/api/queryClient";
+import { LockOverlay } from "@/auth/lock/LockOverlay";
+import { LockProvider } from "@/auth/lock/LockProvider";
 import { SessionProvider } from "@/auth/session";
 import { fontAssets } from "@/theme/fonts";
 import { ThemeProvider, useTheme } from "@/theme/ThemeProvider";
@@ -34,8 +36,11 @@ export default function RootLayout() {
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <SessionProvider>
-              <ThemedStack />
-              <ToastHost />
+              <LockProvider>
+                <ThemedStack />
+                <ToastHost />
+                <LockOverlay />
+              </LockProvider>
             </SessionProvider>
           </QueryClientProvider>
         </ThemeProvider>
