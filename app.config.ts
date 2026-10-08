@@ -29,6 +29,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
   const variant = variantOf(process.env.APP_VARIANT);
   const { name, id } = VARIANTS[variant];
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+  // Universal links for the company's website; with no domain the feature is off (docs/native-features.md).
+  const webDomain = process.env.EXPO_PUBLIC_WEB_DOMAIN?.trim().toLowerCase();
 
   // Tokens travel to the API in request bodies and headers: release builds only talk to it over HTTPS.
   if (variant !== "development" && !apiUrl?.startsWith("https://")) {
@@ -49,9 +51,27 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ios: {
       bundleIdentifier: id,
       supportsTablet: false,
+      ...(webDomain ? { associatedDomains: [`applinks:${webDomain}`] } : {}),
     },
     android: {
       package: id,
+      ...(webDomain
+        ? {
+            intentFilters: [
+              {
+                action: "VIEW",
+                autoVerify: true,
+                data: [
+                  { scheme: "https", host: webDomain, pathPrefix: "/projects" },
+                  { scheme: "https", host: webDomain, pathPrefix: "/meetings" },
+                  { scheme: "https", host: webDomain, pathPrefix: "/notifications" },
+                  { scheme: "https", host: webDomain, pathPrefix: "/today" },
+                ],
+                category: ["BROWSABLE", "DEFAULT"],
+              },
+            ],
+          }
+        : {}),
       adaptiveIcon: {
         backgroundColor: GROUND_LIGHT,
         foregroundImage: "./assets/images/android-icon-foreground.png",
@@ -90,6 +110,55 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
       "expo-sqlite",
       "expo-font",
+      // iOS 17+ asks only to add events; older iOS and Android ask for calendar access.
+      [
+        "expo-calendar",
+        {
+          writeOnlyAccess: true,
+          writeOnlyCalendarPermission:
+            "Allow ID InDetails to add meetings and deadlines to your calendar.",
+          calendarPermission: "Allow ID InDetails to add meetings and deadlines to your calendar.",
+          remindersPermission: false,
+        },
+      ],
+      // iOS background processing for the outbox sync (src/offline/background.ts).
+      "expo-background-task",
+      // iPhone home-screen widget and the timer's Live Activity (src/features/widgets).
+      [
+        "expo-widgets",
+        {
+          groupIdentifier: `group.${id}`,
+          widgets: [
+            {
+              name: "TodayHours",
+              displayName: "Today's hours",
+              description: "Your hours today, with shortcuts to the timer, work and materials.",
+              supportedFamilies: ["systemSmall", "systemMedium"],
+              contentMarginsDisabled: false,
+              android: null,
+            },
+          ],
+        },
+      ],
+      // Android home-screen widget; its name must match ANDROID_WIDGET_NAME (src/features/widgets/snapshot.ts).
+      [
+        "react-native-android-widget",
+        {
+          widgets: [
+            {
+              name: "TodayHours",
+              label: "Today's hours",
+              description: "Your hours today, with shortcuts to the timer, work and materials.",
+              minWidth: "180dp",
+              minHeight: "110dp",
+              targetCellWidth: 3,
+              targetCellHeight: 2,
+              resizeMode: "horizontal|vertical",
+              updatePeriodMillis: 1800000,
+            },
+          ],
+        },
+      ],
     ],
     experiments: {
       reactCompiler: true,
