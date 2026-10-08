@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
+import { afterUnlock } from "@/auth/lock/afterUnlock";
 import { useCurrentUser } from "@/auth/session";
 import { openChat } from "@/features/messages/openChat";
 import { useTabBadges } from "@/features/notifications/slots/useTabBadges";
@@ -98,13 +99,16 @@ export function usePushSetup() {
       });
     });
 
-    const responses = Notifications.addNotificationResponseReceivedListener((response) => {
-      if (context.current) void respondToNotification(response, context.current);
-    });
+    // A tap opens its screen only once the app is unlocked.
+    const respond = (response: Notifications.NotificationResponse) =>
+      afterUnlock(() => {
+        if (context.current) void respondToNotification(response, context.current);
+      });
+    const responses = Notifications.addNotificationResponseReceivedListener(respond);
     // Opened from a notification while the app wasn't running: handled once the person is signed in and in.
     void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response && context.current) {
-        void respondToNotification(response, context.current);
+        respond(response);
         void Notifications.clearLastNotificationResponseAsync();
       }
     });
