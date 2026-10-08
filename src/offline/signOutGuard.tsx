@@ -94,7 +94,7 @@ export function useUnsentRecordsGuard(): UnsentRecordsGuard {
         />
         {!online ? (
           <Text variant="small" tone="muted">
-            You're offline. Sending needs a connection.
+            You’re offline. Sending needs a connection.
           </Text>
         ) : null}
         <Button

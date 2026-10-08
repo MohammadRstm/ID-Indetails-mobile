@@ -225,7 +225,7 @@ export function AddMaterialsScreen({ projectId }: AddMaterialsScreenProps) {
       />
       {!online ? (
         <Text variant="small" tone="muted" style={styles.note}>
-          You're offline. They are saved on your phone and sent when you're back online.
+          You’re offline. They are saved on your phone and sent when you’re back online.
         </Text>
       ) : null}
     </Screen>

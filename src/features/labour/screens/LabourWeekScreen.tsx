@@ -138,7 +138,7 @@ function WeekForm({ projectId, weekStart, projectTitle, week }: WeekFormProps) {
         />
         {!week.isReported ? (
           <Text variant="small" tone="muted">
-            Filled in from the site's usual crew and day rate. Change what was different.
+            Filled in from the site’s usual crew and day rate. Change what was different.
           </Text>
         ) : null}
         <PendingRecordsList projectId={projectId} unsentOnly />

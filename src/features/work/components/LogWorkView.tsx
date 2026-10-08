@@ -93,7 +93,7 @@ export function LogWorkView(props: LogWorkViewProps) {
         {props.shortTimer != null ? (
           <Text variant="small" tone="muted">
             Your timer ran {props.shortTimer < 1 ? "under a minute" : fmtDur(props.shortTimer)}. An
-            entry is at least 5 minutes, so it is logged as 5. Change the times if that isn't right.
+            entry is at least 5 minutes, so it is logged as 5. Change the times if that isn’t right.
           </Text>
         ) : null}
       </Card>

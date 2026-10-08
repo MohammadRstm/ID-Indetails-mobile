@@ -114,7 +114,7 @@ export function MessageBubble({
               },
             ]}
           >
-            <Text variant="micro">Comment on {comment.author.name.split(" ")[0]}'s work</Text>
+            <Text variant="micro">Comment on {comment.author.name.split(" ")[0]}’s work</Text>
             <Text variant="bodyStrong">{comment.projectTitle}</Text>
             <Text variant="small" tone="secondary" numberOfLines={2}>
               {comment.description}

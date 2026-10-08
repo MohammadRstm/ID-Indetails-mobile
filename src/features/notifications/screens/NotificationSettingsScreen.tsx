@@ -178,7 +178,7 @@ export function NotificationSettingsScreen() {
               ))}
             </Card>
             <Text variant="small" tone="muted">
-              The list in Alerts always shows everything. Reminders to log your hours can't be
+              The list in Alerts always shows everything. Reminders to log your hours can’t be
               muted.
             </Text>
           </Section>

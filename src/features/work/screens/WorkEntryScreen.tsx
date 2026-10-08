@@ -133,7 +133,7 @@ export function WorkEntryScreen({ entryId }: WorkEntryScreenProps) {
         </Section>
       ) : (
         <Text variant="small" tone="muted" style={styles.locked}>
-          This entry can't be changed any more.
+          This entry can’t be changed any more.
         </Text>
       )}
       <Section title={comments.length ? `Comments · ${comments.length}` : "Comments"}>
