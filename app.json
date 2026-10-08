@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "ID InDetails",
+    "slug": "id-indetails",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "idindetails",
+    "userInterfaceStyle": "automatic",
+    "plugins": ["expo-router"],
+    "experiments": { "reactCompiler": true }
+  }
+}
