@@ -1,46 +1,49 @@
 import { router } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { useState } from "react";
-import { toApiError } from "@/api/errors";
-import { Screen } from "@/ui";
-import { SignInForm } from "../components/SignInForm";
+import { z } from "zod";
+import { env } from "@/config/env";
+import { signInErrorMessage } from "../authErrors";
+import { useAuthBranding } from "../brandingApi";
+import { AuthLayout } from "../components/AuthLayout";
+import { SignInForm, type SignInErrors } from "../components/SignInForm";
+import { email as emailRule, fieldErrorsOf } from "../passwordRules";
 import { useSession } from "../session";
 
-/** The words for a failed sign-in, by the API's code. Anything else shows the API's own safe message. */
-function signInError(error: unknown): string {
-  const apiError = toApiError(error);
-  switch (apiError.code) {
-    case "invalid_credentials":
-      return "That email and password don't match. Check them and try again.";
-    case "rate_limited":
-    case "too_many_requests":
-      return "Too many attempts. Wait a minute and try again.";
-    default:
-      return apiError.message;
-  }
-}
+const schema = z.object({ email: emailRule, password: z.string().min(1, "Enter your password.") });
 
 /** Signing in. Where it goes next is the layouts' decision (the app, or changing a temporary password). */
 export function SignInScreen() {
-  const { signIn } = useSession();
+  const { signIn, notice } = useSession();
+  const branding = useAuthBranding();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<SignInErrors>({});
 
   const submit = async () => {
-    if (submitting || !email.trim() || !password) return;
+    if (submitting) return;
+    const parsed = schema.safeParse({ email, password });
+    if (!parsed.success) {
+      setErrors(fieldErrorsOf(parsed.error));
+      return;
+    }
     setSubmitting(true);
-    setError(null);
+    setErrors({});
     try {
-      await signIn(email.trim(), password);
+      await signIn(parsed.data.email, parsed.data.password);
     } catch (failure) {
-      setError(signInError(failure));
+      setErrors({ form: signInErrorMessage(failure) });
       setSubmitting(false);
     }
   };
 
   return (
-    <Screen edges={["top", "bottom", "left", "right"]}>
+    <AuthLayout
+      title="Sign in"
+      sub="Projects, work entries and the time behind them."
+      {...branding}
+    >
       <SignInForm
         email={email}
         password={password}
@@ -48,9 +51,11 @@ export function SignInScreen() {
         onPasswordChange={setPassword}
         onSubmit={submit}
         onForgotPassword={() => router.push("/forgot-password")}
+        onOpenWebsite={() => WebBrowser.openBrowserAsync(env.webUrl).catch(() => {})}
         submitting={submitting}
-        error={error}
+        errors={errors}
+        notice={notice}
       />
-    </Screen>
+    </AuthLayout>
   );
 }

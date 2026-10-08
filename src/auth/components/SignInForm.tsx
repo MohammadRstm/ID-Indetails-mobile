@@ -1,6 +1,9 @@
 import { StyleSheet, View } from "react-native";
 import { spacing } from "@/theme/tokens";
-import { Button, InlineError, Text, TextField } from "@/ui";
+import { Button, Divider, InlineError, Text, TextField } from "@/ui";
+import { AuthNotice } from "./AuthNotice";
+
+export type SignInErrors = { email?: string; password?: string; form?: string };
 
 type SignInFormProps = {
   email: string;
@@ -9,12 +12,15 @@ type SignInFormProps = {
   onPasswordChange: (password: string) => void;
   onSubmit: () => void;
   onForgotPassword: () => void;
+  /** Opens the website, where invitations and reset links are completed. */
+  onOpenWebsite: () => void;
   submitting: boolean;
-  /** Why the last attempt failed, in words for the person. */
-  error: string | null;
+  errors: SignInErrors;
+  /** Why the person was signed out, such as a session that ended. */
+  notice: string | null;
 };
 
-/** The sign-in form: email, password, and why it didn't work. */
+/** The sign-in form: email, password, why it didn't work, and the ways out. */
 export function SignInForm({
   email,
   password,
@@ -22,19 +28,19 @@ export function SignInForm({
   onPasswordChange,
   onSubmit,
   onForgotPassword,
+  onOpenWebsite,
   submitting,
-  error,
+  errors,
+  notice,
 }: SignInFormProps) {
   return (
     <View style={styles.form}>
-      <View style={styles.head}>
-        <Text variant="title">ID InDetails</Text>
-        <Text tone="muted">Sign in with your work email.</Text>
-      </View>
+      {notice ? <AuthNotice tone="hold" text={notice} /> : null}
       <TextField
-        label="Email"
+        label="Work email"
         value={email}
         onChangeText={onEmailChange}
+        error={errors.email}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
@@ -46,28 +52,39 @@ export function SignInForm({
         label="Password"
         value={password}
         onChangeText={onPasswordChange}
+        error={errors.password}
         secureTextEntry
         autoComplete="current-password"
         textContentType="password"
         returnKeyType="go"
         onSubmitEditing={onSubmit}
       />
-      {error ? <InlineError message={error} /> : null}
+      {errors.form ? <InlineError message={errors.form} /> : null}
       <Button
-        label="Sign in"
+        label={submitting ? "Signing in…" : "Sign in"}
         variant="primary"
         size="large"
         fullWidth
         onPress={onSubmit}
         loading={submitting}
-        disabled={!email.trim() || !password}
       />
-      <Button label="Forgot your password?" variant="quiet" onPress={onForgotPassword} />
+      <View style={styles.end}>
+        <Button label="Forgot password?" variant="quiet" onPress={onForgotPassword} />
+      </View>
+      <Divider />
+      <View style={styles.invitation}>
+        <Text variant="small" tone="muted">
+          Have an invitation or a password reset link? Open it from the email: it finishes on the
+          website, then sign in here.
+        </Text>
+        <Button label="Open the website" icon="external" onPress={onOpenWebsite} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   form: { gap: spacing.l },
-  head: { gap: spacing.xs, marginBottom: spacing.m },
+  end: { alignItems: "flex-end" },
+  invitation: { gap: spacing.m },
 });

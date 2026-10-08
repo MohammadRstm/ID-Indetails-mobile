@@ -16,13 +16,23 @@ export const http = create({
   paramsSerializer: { indexes: null },
 });
 
+const bearer = (token: string) => `Bearer ${token}`;
+
 http.interceptors.request.use((config) => {
   const token = tokenManager.getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) config.headers.Authorization = bearer(token);
   return config;
 });
 
 type RetriableConfig = InternalAxiosRequestConfig & { retriedAfterRefresh?: boolean };
+
+/** The access token to repeat a refused request with, or null when the session has ended. */
+async function freshToken(sentWith: unknown): Promise<string | null> {
+  // A refresh finished while this request was out: its token is already new, no need for another refresh.
+  const current = tokenManager.getAccessToken();
+  if (current && sentWith !== bearer(current)) return current;
+  return tokenManager.refresh();
+}
 
 http.interceptors.response.use(
   (response) => response,
@@ -32,13 +42,13 @@ http.interceptors.response.use(
       config.retriedAfterRefresh = true;
       let token: string | null;
       try {
-        token = await tokenManager.refresh();
+        token = await freshToken(config.headers.Authorization);
       } catch (refreshError) {
         // The refresh couldn't reach the API: this request fails, the session is kept.
         return Promise.reject(toApiError(refreshError));
       }
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = bearer(token);
         return http(config);
       }
     }

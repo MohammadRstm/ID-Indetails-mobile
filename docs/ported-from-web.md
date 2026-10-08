@@ -9,8 +9,17 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/api/schema.d.ts` | `src/api/schema.d.ts` | Unchanged (generated). Regenerate with `npm run api:types` |
 | `scripts/api-types.mjs` | `scripts/api-types.mjs` | Unchanged |
 | `src/api/errors.ts` | `src/api/errors.ts` | Keeps every message per field (`fieldErrors: Record<string, string[]>`), the `traceId`, and `isApiError`; `errorMessage` and `isStatus` aren't ported |
-| `src/api/http.ts` | `src/api/http.ts` | Same interceptors and array format. The refresh goes through `src/auth/tokenManager.ts` and the mobile endpoints instead of the refresh cookie and a Web Lock |
-| `src/api/queryClient.ts` | `src/api/queryClient.ts` | Same retry rules; focus from `AppState`, online state from NetInfo |
+| `src/api/http.ts` | `src/api/http.ts` | Same interceptors and array format. The refresh goes through `src/auth/tokenManager.ts` and the mobile endpoints instead of the refresh cookie and a Web Lock; a request refused just after another refresh finished is repeated with the new token |
+| `src/api/queryClient.ts` | `src/api/queryClient.ts` | Same retry rules; focus from `AppState` (after refreshing an access token about to run out), online state from NetInfo |
+| `src/auth/session.tsx` | `src/app/session/SessionProvider.tsx` | Same `/auth/me` re-read every 5 minutes and on focus, and the same "Your session ended" notice. Restores from the secure store instead of the cookie (and opens offline with the person known from last time); signing out happens locally even when the API can't be reached; the web's `onSessionReset` is `onSignOut` (`src/auth/signOutCleanup.ts`) |
+| `src/auth/passwordRules.ts` | `src/auth/passwordRules.ts` | Unchanged rules and words; adds `fieldErrorsOf` for the phone's forms |
+| `src/auth/screens/SignInScreen.tsx` | `src/auth/SignInPage.tsx` | Same checks, words and error handling; adds a way to the website for invitation and reset links |
+| `src/auth/screens/ForgotPasswordScreen.tsx` | `src/auth/ForgotPasswordPage.tsx` | Same neutral answer; the link opens the website |
+| `src/auth/screens/ChangePasswordScreen.tsx` | `src/auth/ChangePasswordPage.tsx` | Same rules and words; uses the mobile endpoint, which keeps the phone's session |
+| `src/auth/components/AuthLayout.tsx` | `src/auth/AuthLayout.tsx` | The same card: mark, product name, company name, heading |
+| `src/auth/components/BrandMark.tsx` | `src/shared/components/Identity/Logo.tsx` | Same mark and logo URL, drawn with react-native-svg and expo-image |
+| `src/auth/brandingApi.ts` | `src/shared/components/Identity/useBranding.ts` | Same query and key |
+| `assets/fonts/*.ttf` | `@fontsource-variable/archivo`, `@fontsource-variable/martian-mono` (the web's `src/styles/fonts.css`) | Static instances at the widths the web sets with `font-stretch`, made by `scripts/fonts.py` (Latin and Latin Extended) |
 | `src/api/types.ts` | `src/api/types.ts` | More named aliases |
 | `src/permissions/codes.ts` | `src/app/permissions/codes.ts` | Unchanged |
 | `src/permissions/permissions.ts` | `src/app/permissions/permissions.ts` | `accessLabel` isn't ported |

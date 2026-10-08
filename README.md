@@ -6,16 +6,16 @@ React Native with Expo SDK 57, TypeScript (strict) and Expo Router.
 
 ## Install and run
 
-You need Node 24 (`.nvmrc`) and, to run the app, an Android emulator or phone with a development build (phase-0-plan.md sections 20–22).
+You need Node 24 (`.nvmrc`) and, to run the app, an Android emulator or phone with a development build. [docs/setup.md](docs/setup.md) walks through all of it: the tools, the API, the emulator, the Samsung phone and an iPhone.
 
 ```bash
 npm ci                      # install exactly what package-lock.json lists
-cp .env.example .env        # then set EXPO_PUBLIC_API_URL to where the API runs
+cp .env.example .env        # then set EXPO_PUBLIC_API_URL to where the API runs (setup.md section 3)
 npm run android             # build and install the development build on the emulator or phone
 npm start                   # afterwards: start Metro; the development build reloads on save
 ```
 
-The API runs on the laptop (`dotnet run --launch-profile http --urls http://0.0.0.0:5164` in the API repo). From the Android emulator it is `http://10.0.2.2:5164`; from a phone on the same Wi-Fi, the PC's LAN address.
+The API runs on the laptop from its `MR-Mobile-Api` branch, with that branch's migrations applied to your development database (`dotnet run --project ID-Indetails.api --launch-profile http --urls http://0.0.0.0:5164` in the API repo). From the Android emulator it is `http://10.0.2.2:5164`; from a phone on the same Wi-Fi, the PC's LAN address.
 
 Builds for other people go through EAS (`eas.json`: `development`, `preview`, `production`). Preview and production builds need an `https://` API address, set as an EAS environment variable.
 
@@ -30,11 +30,14 @@ Builds for other people go through EAS (`eas.json`: `development`, `preview`, `p
 | `npm test` | Jest (`jest-expo`), two workers |
 | `npm run format` / `npm run format:check` | Prettier, writing or checking |
 | `npm run api:types` | Regenerates `src/api/schema.d.ts` from the API's OpenAPI document (the API in Development) |
+| `python scripts/fonts.py <web client>` | Makes the static font files from the web's variable fonts (setup.md section 10) |
 
 ## Docs
 
 | Topic | Doc |
 |---|---|
+| Setting up the PC and the devices, and running the app | [docs/setup.md](docs/setup.md) |
+| How the app is built: folders, data, sign-in, the lock, permissions, navigation, theme | [docs/architecture.md](docs/architecture.md) |
 | What the system is, how it looks, sign-in, permissions, and what the phone app adds | [docs/investigation.md](docs/investigation.md) |
 | Phase 0: architecture and implementation plan | [docs/phase-0-plan.md](docs/phase-0-plan.md) |
 | The answers to the plan's open questions | [docs/decisions.md](docs/decisions.md) |
