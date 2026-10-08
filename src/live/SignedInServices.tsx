@@ -6,6 +6,7 @@ import { startSyncEngine } from "@/offline/sync";
 import { P } from "@/permissions/codes";
 import { usePermissions } from "@/permissions/usePermissions";
 import { usePushSetup } from "@/push/usePushSetup";
+import { rememberSignedInUser } from "./signOutCleanup";
 import { useLiveConnection } from "./useLiveConnection";
 
 /**
@@ -24,6 +25,7 @@ export function SignedInServices() {
     P.LABOUR_REPORT_MANAGE,
   );
 
+  useEffect(() => rememberSignedInUser(me.id), [me.id]);
   useEffect(() => startSyncEngine(me.id, queryClient), [me.id, queryClient]);
   useEffect(
     () => (recordsOnSite ? startQueryPersistence(queryClient, me.id) : undefined),

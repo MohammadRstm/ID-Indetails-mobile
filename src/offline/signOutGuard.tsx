@@ -1,31 +1,17 @@
-import { Image } from "expo-image";
-import * as Notifications from "expo-notifications";
 import { useState, type ReactElement } from "react";
 import { useCurrentUser, useSession } from "@/auth/session";
-import { clearTimerNotification } from "@/features/timer/notifications";
 import { Button, ConfirmDialog, InlineError, Sheet, Text } from "@/ui";
 import { isUnsent } from "./model";
 import { deleteRecords, reloadOutbox, useOutbox } from "./outbox";
-import { clearPersistedQueries } from "./persistence";
 import { requestSync } from "./sync";
 import { useIsOnline } from "./useOnline";
 
 /*
  * Signing out on the phone (phase-0-plan.md section 10, "Signing out with unsent records"). With records not yet
- * sent, it first asks: send them now, or sign out and delete them (asked twice), or cancel. Signing out also
- * removes what the phone kept for the person: their kept queries, cached photos, the badge and the timer's
- * notification. (The API removes the phone's push registration with the session.)
+ * sent, it first asks: send them now, or sign out and delete them (asked twice), or cancel. What the phone kept
+ * for the person is removed by the cleanup in src/live/signOutCleanup.ts when the session signs out. (The API
+ * removes the phone's push registration with the session.)
  */
-
-async function forgetPersonalData(userId: number) {
-  await Promise.allSettled([
-    clearPersistedQueries(userId),
-    Image.clearDiskCache(),
-    Image.clearMemoryCache(),
-    Notifications.setBadgeCountAsync(0),
-    clearTimerNotification(),
-  ]);
-}
 
 export type UnsentRecordsGuard = {
   /** Signs out, asking first when records haven't been sent. */
@@ -46,7 +32,6 @@ export function useUnsentRecordsGuard(): UnsentRecordsGuard {
 
   async function leave() {
     setBusy(true);
-    await forgetPersonalData(me.id);
     await session.signOut();
   }
 
