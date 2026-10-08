@@ -43,9 +43,7 @@ function useRequirementChange<T>(request: (arg: T) => Promise<Requirement | null
     mutationFn: request,
     onSuccess: () =>
       Promise.all(
-        REQUIREMENT_CHANGE_REFRESHES.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
-        ),
+        REQUIREMENT_CHANGE_REFRESHES.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ),
   });
 }

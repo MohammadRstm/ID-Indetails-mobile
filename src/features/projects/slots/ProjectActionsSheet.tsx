@@ -47,9 +47,15 @@ export function ProjectActionsSheet({
       onPress: onChangeOwner,
     });
   }
-  if (onActivity) others.push({ key: "activity", title: "Activity", icon: "activity", onPress: onActivity });
+  if (onActivity)
+    others.push({ key: "activity", title: "Activity", icon: "activity", onPress: onActivity });
   if (onAskProton) {
-    others.push({ key: "proton", title: "Ask Proton about it", icon: "compass", onPress: onAskProton });
+    others.push({
+      key: "proton",
+      title: "Ask Proton about it",
+      icon: "compass",
+      onPress: onAskProton,
+    });
   }
 
   return (

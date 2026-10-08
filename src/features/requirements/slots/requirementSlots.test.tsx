@@ -51,7 +51,10 @@ describe("AddRequirementButton", () => {
 });
 
 describe("RequirementManageActions", () => {
-  const render = (requirement = aRequirement(), persona: "designAdmin" | "designEmployee" = "designAdmin") =>
+  const render = (
+    requirement = aRequirement(),
+    persona: "designAdmin" | "designEmployee" = "designAdmin",
+  ) =>
     renderWithProviders(
       <>
         <RequirementManageActions projectId={7} requirement={requirement} />
@@ -129,7 +132,12 @@ describe("RequirementManageActions", () => {
     server.use(
       http.post(api("/projects/7/requirements/31/done"), () =>
         HttpResponse.json(
-          { type: "business_rule", code: "project_closed", message: "The project is closed.", errors: null },
+          {
+            type: "business_rule",
+            code: "project_closed",
+            message: "The project is closed.",
+            errors: null,
+          },
           { status: 422 },
         ),
       ),

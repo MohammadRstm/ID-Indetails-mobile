@@ -30,7 +30,9 @@ export function useFeedRows(): FeedRowOf {
   return useCallback<FeedRowOf>(
     (item, { hideProject = false } = {}) => {
       // The API sends amounts only with financial:view; the phone never shows them without it either.
-      const event = perms.has(P.FINANCIAL_VIEW) ? item : { ...item, amount: null, prevAmount: null };
+      const event = perms.has(P.FINANCIAL_VIEW)
+        ? item
+        : { ...item, amount: null, prevAmount: null };
       let target: Href | null = null;
       if (item.project && !hideProject && item.domain) {
         target = routeForTarget(
@@ -73,7 +75,10 @@ export function useFeedRows(): FeedRowOf {
 }
 
 /** The events by the company day they happened, newest first, as rows that open what they are about. */
-export function useFeedDays(items: ActivityItem[], options: { hideProject?: boolean } = {}): FeedDay[] {
+export function useFeedDays(
+  items: ActivityItem[],
+  options: { hideProject?: boolean } = {},
+): FeedDay[] {
   const rowOf = useFeedRows();
   const days: FeedDay[] = [];
   for (const item of items) {

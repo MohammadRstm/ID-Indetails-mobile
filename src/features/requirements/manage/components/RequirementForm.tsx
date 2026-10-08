@@ -60,7 +60,9 @@ export function RequirementForm({
         value={text}
         onChangeText={onChangeText}
         placeholder={`What has to be achieved? e.g. ${
-          execution ? "Kitchen tiling finished and inspected" : "Concept design approved by the client"
+          execution
+            ? "Kitchen tiling finished and inspected"
+            : "Concept design approved by the client"
         }`}
         multiline
         maxLength={REQUIREMENT_MAX_LENGTH}
@@ -86,7 +88,9 @@ export function RequirementForm({
             title="Assigned to"
             subtitle={who}
             leading={<Icon name="people" />}
-            trailing={assignees.length > 0 ? <AvatarStack people={assignees} size={22} /> : undefined}
+            trailing={
+              assignees.length > 0 ? <AvatarStack people={assignees} size={22} /> : undefined
+            }
             chevron
             onPress={onPickAssignees}
             accessibilityLabel={`Assigned to: ${who}`}
@@ -105,7 +109,13 @@ export function RequirementForm({
         onPress={onSave}
       />
       {onDelete && (
-        <Button label="Delete requirement" icon="trash" variant="danger" fullWidth onPress={onDelete} />
+        <Button
+          label="Delete requirement"
+          icon="trash"
+          variant="danger"
+          fullWidth
+          onPress={onDelete}
+        />
       )}
     </View>
   );

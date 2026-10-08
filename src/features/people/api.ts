@@ -49,8 +49,7 @@ export function useEmployees(params: EmployeeListParams, enabled = true) {
   const p = clean({ pageSize: 100, ...params });
   return useQuery({
     queryKey: employeeKeys.list(p),
-    queryFn: async () =>
-      (await http.get<Paged<EmployeeSummary>>("/employees", { params: p })).data,
+    queryFn: async () => (await http.get<Paged<EmployeeSummary>>("/employees", { params: p })).data,
     select: (page) => page.items,
     placeholderData: keepPreviousData,
     enabled,
@@ -77,8 +76,7 @@ export function useEmployee(id: number) {
 export function useWorkSummary(id: number, enabled: boolean) {
   return useQuery({
     queryKey: employeeKeys.workSummary(id),
-    queryFn: async () =>
-      (await http.get<WorkSummary>(`/employees/${id}/work-summary`)).data,
+    queryFn: async () => (await http.get<WorkSummary>(`/employees/${id}/work-summary`)).data,
     enabled,
   });
 }
@@ -104,8 +102,7 @@ export function useRecentEntries(id: number, enabled: boolean) {
 export function useSiteRecords(id: number, enabled: boolean) {
   return useQuery({
     queryKey: employeeKeys.siteRecords(id),
-    queryFn: async () =>
-      (await http.get<SiteRecords>(`/employees/${id}/site-records`)).data,
+    queryFn: async () => (await http.get<SiteRecords>(`/employees/${id}/site-records`)).data,
     enabled,
   });
 }

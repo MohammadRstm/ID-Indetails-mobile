@@ -46,8 +46,7 @@ export function useProjectList(params: ProjectListParams, enabled = true) {
   );
   return useQuery({
     queryKey: projectKeys.list(p),
-    queryFn: async () =>
-      (await http.get<Paged<ProjectSummary>>("/projects", { params: p })).data,
+    queryFn: async () => (await http.get<Paged<ProjectSummary>>("/projects", { params: p })).data,
     placeholderData: keepPreviousData,
     enabled,
   });

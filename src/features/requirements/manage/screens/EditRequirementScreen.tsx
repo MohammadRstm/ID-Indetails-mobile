@@ -7,15 +7,7 @@ import { PeoplePickerSheet } from "@/features/people/components/PeoplePickerShee
 import { useProject } from "@/features/projects/slots/projectAdminApi";
 import { P } from "@/permissions/codes";
 import { usePermissions } from "@/permissions/usePermissions";
-import {
-  ConfirmDialog,
-  EmptyState,
-  LoadError,
-  Screen,
-  ScreenHeader,
-  Skeleton,
-  toast,
-} from "@/ui";
+import { ConfirmDialog, EmptyState, LoadError, Screen, ScreenHeader, Skeleton, toast } from "@/ui";
 import {
   requirementsLocked,
   useDeleteRequirement,
@@ -162,7 +154,8 @@ function RequirementEditor({ project, requirement }: RequirementEditorProps) {
           const next: RequirementFormErrors = {
             text: field("text"),
             deadline: field("deadline"),
-            assignees: field("assigneeIds") ?? (e.code === "assignee_not_allowed" ? e.message : undefined),
+            assignees:
+              field("assigneeIds") ?? (e.code === "assignee_not_allowed" ? e.message : undefined),
           };
           if (!next.text && !next.deadline && !next.assignees) next.form = e.message;
           setErrors(next);

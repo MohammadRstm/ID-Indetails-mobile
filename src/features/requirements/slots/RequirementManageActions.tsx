@@ -20,7 +20,10 @@ export type RequirementManageActionsProps = { projectId: number; requirement: Re
  * A requirement row's menu for requirement:manage: tick or untick it for anyone, edit it, delete it. Hidden while
  * the project is completed or archived, when the API would refuse every change.
  */
-export function RequirementManageActions({ projectId, requirement }: RequirementManageActionsProps) {
+export function RequirementManageActions({
+  projectId,
+  requirement,
+}: RequirementManageActionsProps) {
   const allowed = canOpen(usePermissions(), "editRequirement");
   const project = useProject(projectId, allowed);
   const tick = useTickRequirement(projectId);

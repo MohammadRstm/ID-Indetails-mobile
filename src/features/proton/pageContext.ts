@@ -28,7 +28,9 @@ export function protonHrefFor(type: RefType, id: number, domain: string | null):
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 /** The context Proton's screen was opened with, or null. Anything that doesn't fit is dropped. */
-export function pageContextOf(params: Record<string, string | string[] | undefined>): ProtonPageContext | null {
+export function pageContextOf(
+  params: Record<string, string | string[] | undefined>,
+): ProtonPageContext | null {
   const area = AREAS.find((a) => a === first(params.area));
   const type = TYPES.find((t) => t === first(params.about));
   const idText = first(params.id);

@@ -33,10 +33,9 @@ describe("AdminProjectActions", () => {
   });
 
   it("offers archive and reopen for a completed project", async () => {
-    await renderWithProviders(
-      <AdminProjectActions project={aProject({ status: "completed" })} />,
-      { persona: "executionAdmin" },
-    );
+    await renderWithProviders(<AdminProjectActions project={aProject({ status: "completed" })} />, {
+      persona: "executionAdmin",
+    });
     await openMenu();
     expect(screen.getByRole("button", { name: "Archive" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Reopen" })).toBeTruthy();
@@ -122,7 +121,10 @@ describe("AdminProjectActions", () => {
         const role = new URL(request.url).searchParams.get("role");
         const items =
           role === "admin"
-            ? [anEmployee({ id: 2, firstName: "Nadia", role: "admin" }), anEmployee({ id: 9, firstName: "Omar", role: "admin" })]
+            ? [
+                anEmployee({ id: 2, firstName: "Nadia", role: "admin" }),
+                anEmployee({ id: 9, firstName: "Omar", role: "admin" }),
+              ]
             : [];
         return HttpResponse.json({ items, page: 1, pageSize: 100, totalCount: items.length });
       }),
