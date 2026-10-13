@@ -190,7 +190,7 @@ Phase 1a creates them with their final exports and a working first version. Phas
 | `src/permissions/usePermissions.ts` | `usePermissions()` |
 | `src/permissions/screens.ts` | `screens` (every route key with its rule), `canOpen(perms, key)`, `tabsFor(perms)`, `persona(perms): "design_employee" \| "execution_employee" \| "admin" \| "super_admin"` |
 | `src/navigation/targets.ts` | `routeForTarget(target: PushTarget, perms): Href \| null`, `routeForProtonCommand(cmd, perms): Href \| null` |
-| `src/theme/tokens.ts` | `light`, `dark` (every web token), `radii`, `spacing` |
+| `src/theme/tokens.ts` | `light`, `dark` (every web token), `radii`, `spacing`, and the blob's `protonLight`, `protonDark`, `protonMoodColors` |
 | `src/theme/ThemeProvider.tsx` | `ThemeProvider`, `useTheme(): { colors, scheme: "light" \| "dark", preference, setPreference }` |
 | `src/theme/typography.ts` | Text variants (`title`, `heading`, `body`, `label`, `micro`, `mono`, `figure`, …) |
 | `src/format/*` | Ported `time.ts`, `money.ts`, `periods.ts`, `phone.ts` (company time zone always) |

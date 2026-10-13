@@ -38,11 +38,16 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/features/proton/errorWords.ts` | — (the web shows the API's message) | The phone words the new Proton codes itself, in the web's voice; other failures keep the API's message |
 | `src/features/proton/refs.ts` | `src/domains/shared/proton/ProtonProvider.tsx` (`linkOf`) | A `team` ref opens that team's chat through the push target `conversation`; a project ref in a domain the person can't see has no link |
 | `src/features/messages/components/MessageBubble.tsx` (`viaProton`) | `src/domains/shared/messages/Thread.tsx` | "with Proton ·" before the time, italic; the tooltip becomes the accessibility label, since touch has none |
+| `src/features/proton/blob/blobShape.ts`, `protonMood.ts` | `src/domains/shared/proton/blob/blobShape.ts`, `protonMood.ts` | Logic verbatim (only the indentation differs); the blob's own size, wobble, springs and mood names are the web's |
+| `src/features/proton/blob/ProtonBlob.tsx`, `blobMotion.ts`, `useBlobPath.ts` | `BlobFigure.tsx`, `useBlobMotion.ts` | Same figure and eyes in `react-native-svg`. The blurred glow (an SVG filter) is a radial gradient; the outline is redrawn about 30 times a second only while thinking, working or talking, never under reduced motion or in the background; while talking it breathes steadily instead of following the arriving words. There is no draggable floating blob: Proton opens from buttons and from its screen |
+| `src/features/proton/blob/conversationMood.ts`, `useConversationMood.ts` | `ProtonHost.tsx`, `protonStore.ts` (`talkingUntil`, `errorUntil`, `happyUntil`) | The mood of the Proton screen's header from its own state: thinking, then working after 3 s, talking while text arrives, proposing while a card is open, error and happy for a few seconds after a failure or a confirmed change, asleep when Proton can't answer |
+| `src/features/proton/components/AskProtonButton.tsx`, `slots/ProtonEntry.tsx` | `ProtonHost.tsx` (the blob button) | A small blob with "Ask Proton" in the Today headers, the blob alone on My work, My pay, Messages and Alerts; only for people with `proton:use`; it opens Proton with the page it was pressed on |
 | `src/format/time.ts` | `src/shared/format/time.ts` | Unchanged |
 | `src/format/money.ts` | `src/shared/format/money.ts` | Unchanged |
 | `src/format/periods.ts` | `src/shared/format/periods.ts` | Unchanged |
 | `src/format/phone.ts` | `src/shared/format/phone.ts` | Unchanged |
-| `src/theme/tokens.ts` | `src/styles/hourline.css` (`:root` and the dark theme) | Every token, values verbatim, named in camelCase (`--surface-2` → `surface2`) |
+| `src/theme/tokens.ts` | `src/styles/hourline.css` (`:root` and the dark theme) | Every token, values verbatim, named in camelCase (`--surface-2` → `surface2`) | 
+| `src/theme/tokens.ts` (`protonLight`, `protonDark`, `protonMoodColors`) | `src/styles/client.css` (`--proton-*`) | The blob's colours, values verbatim, kept apart from the theme's; the asleep, error and happy overrides |
 | `src/ui/icons.ts` | `src/shared/icons/icons.ts` | Unchanged; `src/ui/Icon.tsx` turns `class="f"` into a fill for react-native-svg |
 | `src/ui/avatars.ts` | `src/shared/components/Identity/avatars.ts` | Same seed, hash, tints and options on DiceBear 9; returns the SVG text instead of a data URI |
 | `src/ui/toast.ts` | `src/shared/components/Feedback/toast.ts` | No hover or focus hold and no exit animation state |
