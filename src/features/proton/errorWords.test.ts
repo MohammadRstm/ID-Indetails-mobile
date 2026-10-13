@@ -1,5 +1,5 @@
 import { ApiError } from "@/api/errors";
-import { protonErrorText } from "./errorWords";
+import { protonErrorText, rememberErrorText } from "./errorWords";
 
 const failure = (code: string, message = "The API's own words.") =>
   new ApiError(422, { code, message });
@@ -32,5 +32,16 @@ describe("protonErrorText", () => {
   it("keeps the API's message for any other failure", () => {
     expect(protonErrorText(failure("proton_busy", "Still answering."))).toBe("Still answering.");
     expect(protonErrorText(failure("toString"))).toBe("The API's own words.");
+  });
+});
+
+describe("rememberErrorText", () => {
+  it("shows why the API refused to remember something", () => {
+    const refused = failure("proton_memory_refused", "That reads like an instruction to act.");
+    expect(rememberErrorText(refused)).toBe("That reads like an instruction to act.");
+  });
+
+  it("says any other failure as Proton does", () => {
+    expect(rememberErrorText(failure("proton_busy", "Still answering."))).toBe("Still answering.");
   });
 });

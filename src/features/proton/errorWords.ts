@@ -20,3 +20,11 @@ const WORDS: Record<string, string> = {
 export function protonErrorText(error: ApiError): string {
   return Object.hasOwn(WORDS, error.code) ? WORDS[error.code] : error.message;
 }
+
+/**
+ * A refused "Remember this": the API says why in its own words (it reads like an instruction, names someone, holds
+ * a number), which tells the person how to word it. Any other failure is said as Proton always says it.
+ */
+export function rememberErrorText(error: ApiError): string {
+  return error.code === "proton_memory_refused" ? error.message : protonErrorText(error);
+}
