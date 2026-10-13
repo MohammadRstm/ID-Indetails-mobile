@@ -155,3 +155,10 @@ Order: 6A → 6B → 6C → 6D → 6E, then 6F if approved. 6A comes first becau
 - **Proton budget page:** the website's budget page now has a "Changes Proton proposed" table (`GET /proton/actions/all`); the phone keeps the budget on the web.
 - **Expo rewrote `tsconfig.json`:** running `npx expo start` reformatted the phone's `tsconfig.json` and dropped `.expo/types/**/*.ts` and `expo-env.d.ts` from `include`. The change is uncommitted in `Desktop/ID-Indetails-mobile`.
 - **The EAS branch:** `MR-Mobile-Eas` (Expo project link and `expo-dev-client`) isn't pushed or merged yet. Without it, `main` can't make a development build.
+
+## Answers (13 Oct 2026)
+
+- **6A–6E approved.** They are built one at a time on Sonnet, at low priority: each starts only once the other sessions have finished their builds and tests.
+- **Voice (6F): later.**
+- **Proton for employees:** no answer, so the recommended default applies: a Proton button in the Today header for everyone with `proton:use`, tabs unchanged.
+- **Migrations:** the phone and the website share one dev database, and the 5 Proton migrations belong to the website's work, not the phone's. Whether they are already applied is up to the sessions that wrote them. The phone has no unapplied migrations of its own, and nothing is applied from here.
