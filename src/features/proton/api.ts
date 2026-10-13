@@ -1,6 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { http } from "@/api/http";
-import type { ProtonReply, Schemas } from "@/api/types";
+import type { Paged, ProtonReply, Schemas } from "@/api/types";
 
 /* Proton, the assistant (proton:use). Every key starts with "proton", so a confirmed change can refresh everything else. */
 
@@ -13,6 +20,9 @@ export type ProtonChoice = Schemas["ProtonChoice"];
 export type ProtonSource = Schemas["ProtonSourceResponse"];
 export type ProtonQuickReplyOption = Schemas["ProtonQuickReplyOption"];
 export type ProtonBriefing = Schemas["ProtonBriefingResponse"];
+export type ProtonChatSummary = Schemas["ProtonConversationSummaryResponse"];
+export type ProtonSavedChat = Schemas["ProtonConversationResponse"];
+export type ProtonMemory = Schemas["ProtonMemoryResponse"];
 
 /**
  * A typed question, or what a button of the last reply stands for: a choice, a quick reply or a suggestion (its
@@ -100,11 +110,84 @@ export function useMyProtonActions(enabled: boolean) {
   });
 }
 
-/** Ends a conversation on the server; the next question starts a new one. */
-export function useEndConversation() {
+const chatsKey = ["proton", "chats"] as const;
+const memoriesKey = ["proton", "memories"] as const;
+const CHATS_PAGE = 20;
+
+/** The person's saved chats, newest first, a page at a time; `search` matches the chat's name. */
+export function useProtonChats(search: string, enabled: boolean) {
+  return useInfiniteQuery({
+    queryKey: [...chatsKey, search],
+    queryFn: async ({ pageParam }) =>
+      (
+        await http.get<Paged<ProtonChatSummary>>("/proton/conversations", {
+          params: { search: search || undefined, page: pageParam, pageSize: CHATS_PAGE },
+        })
+      ).data,
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.pageSize < last.totalCount ? last.page + 1 : undefined,
+    placeholderData: keepPreviousData,
+    enabled,
+  });
+}
+
+/** A saved chat with its messages, or why they are not given. Always read afresh: it changes with every answer. */
+export async function fetchSavedChat(id: string): Promise<ProtonSavedChat> {
+  return (await http.get<ProtonSavedChat>(`/proton/conversations/${id}`)).data;
+}
+
+/** The chat list is out of date: a chat was started, renamed or deleted. */
+export function refreshChats(queryClient: QueryClient) {
+  return queryClient.invalidateQueries({ queryKey: chatsKey });
+}
+
+export function useRenameChat() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (conversationId: string) => {
-      await http.delete(`/proton/conversations/${conversationId}`);
+    mutationFn: async (v: { id: string; title: string }) =>
+      (await http.patch<ProtonChatSummary>(`/proton/conversations/${v.id}`, { title: v.title }))
+        .data,
+    onSuccess: () => refreshChats(queryClient),
+  });
+}
+
+/** Deletes a saved chat for good. Starting a new chat is not this: it only leaves the open one. */
+export function useDeleteChat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await http.delete(`/proton/conversations/${id}`);
     },
+    onSuccess: () => refreshChats(queryClient),
+  });
+}
+
+/** What Proton remembers for the person between chats: only what they asked it to, in their own words. */
+export function useProtonMemories(enabled: boolean) {
+  return useQuery({
+    queryKey: memoriesKey,
+    queryFn: async () => (await http.get<ProtonMemory[]>("/proton/memories")).data,
+    enabled,
+  });
+}
+
+/** "Remember this" on one of the person's own messages; the API refuses what it may not keep. */
+export function useRemember() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (v: { conversationId: string; text: string }) =>
+      (await http.post<ProtonMemory>("/proton/memories", v)).data,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: memoriesKey }),
+  });
+}
+
+export function useForgetMemory() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      await http.delete(`/proton/memories/${id}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: memoriesKey }),
   });
 }

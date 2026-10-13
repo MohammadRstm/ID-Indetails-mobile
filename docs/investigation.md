@@ -387,7 +387,7 @@ Sent over SMTP: invitations, temporary super-admin passwords, password resets, s
 - `POST /api/proton/messages` `{conversationId, text, page, choice}` → `{conversationId, reply, refs, sources, choices, pendingAction, uiCommands, usage, limited}`. **Not streamed**: one answer, up to 55 seconds.
 - Proposed changes come back as `pendingAction` cards, confirmed or cancelled with `POST /api/proton/actions/{id}/confirm|cancel`.
 - **Cards since 13 Oct 2026:** a reply carries up to 3 cards in `pendingActions` (`pendingAction` is the last). `preview.confirm` is `standard` (one Confirm), `two_step` (Review, then Confirm) or `typed` (the phrase is typed and sent as `typed`; a wrong one is `422 proton_phrase_mismatch`). `GET /api/proton/actions` gives the status of each card. The phone's rules are in `src/features/proton/cards.ts`.
-- `GET /api/proton/usage` for "N of M questions left this month"; `DELETE /api/proton/conversations/{id}` starts over.
+- `GET /api/proton/usage` for "N of M questions left this month". Chats are saved by the API: `GET /api/proton/conversations` (list, `search`, `page`), `GET`/`PATCH`/`DELETE /api/proton/conversations/{id}`. **`DELETE` deletes the saved chat for good**; "New conversation" on the phone only leaves the open chat and never calls it.
 - Conversations live in the API's memory (30 minutes idle, 4 hours or 20 questions at most).
 - **Navigation commands use names, not web addresses:** `open_project`, `open_client`, `open_person`, `open_page` (`dashboard`, `projects`, `clients`, `people`, `financials`, `meetings`, `activity`, `reports`, `company_overview`, `company_expenses`) and `refresh`, with optional `section` and `tab`. The app can map them straight onto its own screens.
 

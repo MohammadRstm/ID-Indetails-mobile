@@ -51,6 +51,7 @@ const answer = (...cards: ProtonPendingAction[]): ProtonTurn => ({
   quickReplies: [],
   suggestions: [],
   did: null,
+  blocks: [],
 });
 
 const summary = (

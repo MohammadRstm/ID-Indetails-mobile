@@ -5,6 +5,7 @@ import type {
   ProtonRef,
   ProtonSource,
 } from "./api";
+import type { ProtonBlock } from "./figures";
 
 /** Where a proposed change stands in the chat. Only "open" can still be confirmed. */
 export type ActionState =
@@ -34,6 +35,8 @@ export type ProtonTurn =
       suggestions: string[];
       /** What the app did for this reply ("Opened Villa Mounir."), if anything. */
       did: string | null;
+      /** Charts, tables and headline figures shown under the answer. */
+      blocks: ProtonBlock[];
     }
   /** Something the app says about the chat itself: that an answer was stopped, or the chat was summed up. */
   | { from: "note"; text: string }
