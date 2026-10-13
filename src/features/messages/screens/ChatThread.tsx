@@ -6,6 +6,7 @@ import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, View } from "reac
 import { toApiError } from "@/api/errors";
 import type { Message } from "@/api/types";
 import { useCurrentUser } from "@/auth/session";
+import { takeProtonDraft } from "@/features/proton/drafts";
 import { fileSource, photoOf, pickMedia, uploadMedia } from "@/features/work/photos";
 import { spacing } from "@/theme/tokens";
 import { EmptyState, InlineError, Screen, ScreenHeader, Skeleton } from "@/ui";
@@ -42,7 +43,9 @@ export function ChatThread({ chat, title, subtitle }: ChatThreadProps) {
   const members = useTeamMembers(chat.kind === "team" ? chat.teamId : null);
   const markRead = useMarkChatRead(chat);
   const send = useSendMessage(chat);
-  const [text, setText] = useState("");
+  const [draft] = useState(() => takeProtonDraft(chat));
+  const [text, setText] = useState(draft ?? "");
+  const [fromProton, setFromProton] = useState(draft != null);
   const [files, setFiles] = useState<PickedFile[]>([]);
   const [uploading, setUploading] = useState(0);
   const [mentioned, setMentioned] = useState<{ id: number; name: string }[]>([]);
@@ -114,6 +117,7 @@ export function ChatThread({ chat, title, subtitle }: ChatThreadProps) {
     };
     setOutgoing((list) => [...list, item]);
     setText("");
+    setFromProton(false);
     setFiles([]);
     setMentioned([]);
     setWarning(null);
@@ -234,6 +238,7 @@ export function ChatThread({ chat, title, subtitle }: ChatThreadProps) {
           error={error}
           canSend={canSend}
           onSend={submit}
+          fromProton={fromProton}
         />
       </KeyboardAvoidingView>
     </Screen>

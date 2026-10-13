@@ -11,19 +11,27 @@ export type ProtonActionSummary = Schemas["ProtonActionSummaryResponse"];
 export type ProtonRef = Schemas["ProtonRef"];
 export type ProtonChoice = Schemas["ProtonChoice"];
 export type ProtonSource = Schemas["ProtonSourceResponse"];
+export type ProtonQuickReplyOption = Schemas["ProtonQuickReplyOption"];
+export type ProtonBriefing = Schemas["ProtonBriefingResponse"];
 
-/** A typed question, or one of the last reply's choices. A choice sends only what it is: the API checks it was offered. */
+/**
+ * A typed question, or what a button of the last reply stands for: a choice, a quick reply or a suggestion (its
+ * place in the list). A button sends only what it is, never text: the API checks it was offered.
+ */
 export type AskBody = {
   conversationId: string | null;
   text?: string;
   page?: Schemas["ProtonPageContext"] | null;
   choice?: { type: Schemas["ProtonRefType"]; id: number };
+  reply?: Schemas["ProtonQuickReply"];
+  suggestion?: number;
 };
 
-const usageKey = ["proton", "usage"] as const;
+export const usageKey = ["proton", "usage"] as const;
 const actionsKey = ["proton", "actions"] as const;
+const briefingKey = ["proton", "briefing"] as const;
 
-/** The answer is written whole, not streamed, and can take a while: it gets its own, longer, timeout. */
+/** The JSON endpoint writes the answer whole and can take a while: it gets its own, longer, timeout. */
 export const ASK_TIMEOUT_MS = 55_000;
 
 /** The person's question allowance this month, and whether Proton can answer now. */
@@ -34,13 +42,22 @@ export function useProtonUsage() {
   });
 }
 
-/** One question. The answer may carry proposed changes, which only the person's Confirm carries out. */
-export function useAskProton() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (body: AskBody) =>
-      (await http.post<ProtonReply>("/proton/messages", body, { timeout: ASK_TIMEOUT_MS })).data,
-    onSuccess: (reply) => queryClient.setQueryData(usageKey, reply.usage),
+/**
+ * One question on the JSON endpoint, answered whole: the way to ask when the live stream isn't available. The
+ * answer may carry proposed changes, which only the person's Confirm carries out.
+ */
+export async function askProtonJson(body: AskBody, signal?: AbortSignal): Promise<ProtonReply> {
+  const config = { timeout: ASK_TIMEOUT_MS, signal };
+  return (await http.post<ProtonReply>("/proton/messages", body, config)).data;
+}
+
+/** What may need the person's attention, for Proton's greeting: no model call, no question used. */
+export function useProtonBriefing(enabled: boolean) {
+  return useQuery({
+    queryKey: briefingKey,
+    queryFn: async () => (await http.get<ProtonBriefing>("/proton/briefing")).data,
+    enabled,
+    retry: false,
   });
 }
 

@@ -48,6 +48,8 @@ const answer = (...cards: ProtonPendingAction[]): ProtonTurn => ({
   sources: [],
   cards,
   choices: [],
+  quickReplies: [],
+  suggestions: [],
   did: null,
 });
 

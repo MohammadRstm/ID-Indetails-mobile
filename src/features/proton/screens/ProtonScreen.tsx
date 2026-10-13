@@ -1,126 +1,81 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
-import { toApiError } from "@/api/errors";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { useCurrentUser } from "@/auth/session";
+import { minutesOfDay } from "@/format/time";
 import { usePermissions } from "@/permissions/usePermissions";
-import { useTheme } from "@/theme/ThemeProvider";
-import { radii, spacing } from "@/theme/tokens";
-import { typography } from "@/theme/typography";
+import { spacing } from "@/theme/tokens";
 import { Button, Chip, IconButton, Screen, ScreenHeader, Text } from "@/ui";
-import {
-  useAskProton,
-  useEndConversation,
-  useProtonUsage,
-  type AskBody,
-  type ProtonChoice,
-} from "../api";
-import { cardsOf, isReplaced, newestCards } from "../cards";
-import type { ActionState, ProtonTurn } from "../chat";
+import { useProtonBriefing, useProtonUsage } from "../api";
+import { briefingRows } from "../briefing";
+import { isReplaced, newestCards } from "../cards";
 import { Bubble } from "../components/Bubble";
-import { protonErrorText } from "../errorWords";
+import { ChatNote } from "../components/ChatNote";
+import { LiveReply } from "../components/LiveReply";
+import { ProtonComposer, type ReplyChip } from "../components/ProtonComposer";
+import { ProtonWelcome } from "../components/ProtonWelcome";
+import { greetingFor, startersFor } from "../greeting";
 import { pageContextOf } from "../pageContext";
 import { hrefOfRef } from "../refs";
-import { useCarryOut } from "../useCarryOut";
+import { useProtonChat } from "../useProtonChat";
 import { ProtonActionCard } from "./ProtonActionCard";
 
 const MAX_QUESTION = 2000;
-const THINKING = "Proton is thinking. This can take up to a minute.";
-
-type Question = Omit<AskBody, "conversationId" | "page">;
+const LOOKING = "Looking into it…";
 
 /**
  * Proton, the assistant (proton:use): questions in plain language, answered from what this person may see. The
- * answer arrives whole. A change it proposes happens only when the person presses Confirm on its card; typing
- * "yes" confirms nothing. The chat lives as long as the screen does.
+ * answer arrives as it is written, with Stop while it does. A change it proposes happens only when the person
+ * presses Confirm on its card; typing "yes" confirms nothing. The chat lives as long as the screen does.
  */
 export function ProtonScreen() {
-  const { colors } = useTheme();
   const perms = usePermissions();
-  const carryOut = useCarryOut();
-  const page = pageContextOf(useLocalSearchParams());
+  const me = useCurrentUser();
+  const page = pageContextOf(useLocalSearchParams(), perms);
   const usage = useProtonUsage();
-  const ask = useAskProton();
-  const end = useEndConversation();
+  const chat = useProtonChat(page);
   const [text, setText] = useState("");
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [turns, setTurns] = useState<ProtonTurn[]>([]);
-  const [actions, setActions] = useState<Record<string, ActionState>>({});
+  const [minute] = useState(() => minutesOfDay(new Date()));
   const scroller = useRef<ScrollView>(null);
 
-  // A newer card for the same change replaces only its own. Only the newest reply's choices can be picked.
+  const { turns, live } = chat;
+  const answering = live != null;
+  const left = usage.data;
+  const blocked = left != null && !left.available;
+  const briefing = useProtonBriefing(turns.length === 0 && !blocked);
+
+  const welcomeRows = briefingRows(briefing.data, perms).map(({ href, ...row }) => ({
+    ...row,
+    onPress: href ? () => router.push(href) : undefined,
+  }));
+
+  // A newer card for the same change replaces only its own. Only the newest reply's buttons can be pressed.
   const newest = newestCards(turns);
   const lastTurn = turns.length - 1;
-
-  function send(question: Question, id: string | null, retried = false) {
-    ask.mutate(
-      { conversationId: id, page, ...question },
-      {
-        onSuccess: (reply) => {
-          const did = carryOut(reply.uiCommands);
-          setConversationId(reply.conversationId);
-          setTurns((t) => [
-            ...t,
-            {
-              from: "proton",
-              text: reply.reply,
-              refs: reply.refs,
-              sources: reply.sources,
-              cards: cardsOf(reply),
-              choices: reply.choices,
-              did,
-            },
-          ]);
-        },
-        onError: (error) => {
-          const failure = toApiError(error);
-          if (failure.code === "proton_conversation_ended" && id != null) {
-            // The server no longer has the chat: a typed question is asked again in a new one, a button is not.
-            setConversationId(null);
-            if (question.text && !retried) return send({ text: question.text }, null, true);
-            setTurns((t) => [
-              ...t,
-              { from: "error", text: `${failure.message} Could you ask that again?` },
-            ]);
-            return;
-          }
-          setTurns((t) => [...t, { from: "error", text: protonErrorText(failure) }]);
-        },
-      },
-    );
-  }
-
-  function submit(shown: string, question: Question) {
-    if (ask.isPending) return;
-    setTurns((t) => [...t, { from: "you", text: shown }]);
-    send(question, conversationId);
-  }
+  const newestReply = turns[lastTurn];
+  const chips: ReplyChip[] =
+    newestReply?.from === "proton" && !answering
+      ? [
+          ...newestReply.quickReplies.map((option) => ({
+            key: `reply-${option.reply}`,
+            label: option.label,
+            onPress: () => chat.quickReply(option),
+          })),
+          ...newestReply.suggestions.map((suggestion, index) => ({
+            key: `suggestion-${index}`,
+            label: suggestion,
+            onPress: () => chat.suggest(suggestion, index),
+          })),
+        ]
+      : [];
 
   function typed() {
     const question = text.trim();
-    if (!question) return;
+    if (!question || answering) return;
     setText("");
-    submit(question, { text: question });
+    chat.ask(question);
   }
 
-  const pick = (choice: ProtonChoice) =>
-    submit(choice.label, { choice: { type: choice.type, id: choice.id } });
-
-  function startOver() {
-    if (conversationId) end.mutate(conversationId);
-    setConversationId(null);
-    setTurns([]);
-    setActions({});
-  }
-
-  const left = usage.data;
-  const blocked = left != null && !left.available;
   const usageLine = !left
     ? " "
     : left.companyLimitReached
@@ -139,7 +94,11 @@ export function ProtonScreen() {
           onBack={router.canGoBack() ? () => router.back() : undefined}
           actions={
             turns.length > 0 ? (
-              <IconButton icon="plus" onPress={startOver} accessibilityLabel="New conversation" />
+              <IconButton
+                icon="plus"
+                onPress={chat.startOver}
+                accessibilityLabel="New conversation"
+              />
             ) : undefined
           }
         />
@@ -157,12 +116,16 @@ export function ProtonScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {turns.length === 0 ? (
-            <Text tone="secondary">
-              Ask me about your projects, clients, people or deadlines. I only use what you are
-              allowed to see.
-            </Text>
+            <ProtonWelcome
+              greeting={greetingFor(me.firstName, minute)}
+              rows={welcomeRows}
+              more={briefing.data?.more ?? 0}
+              starters={startersFor(page, perms)}
+              onStarter={blocked || answering ? () => undefined : chat.ask}
+            />
           ) : null}
           {turns.map((turn, i) => {
+            if (turn.from === "note") return <ChatNote key={i} text={turn.text} />;
             if (turn.from !== "proton") return <Bubble key={i} from={turn.from} text={turn.text} />;
             return (
               <View key={i} style={styles.turn}>
@@ -191,8 +154,8 @@ export function ProtonScreen() {
                           label={
                             choice.detail ? `${choice.label} · ${choice.detail}` : choice.label
                           }
-                          disabled={i !== lastTurn || ask.isPending}
-                          onPress={() => pick(choice)}
+                          disabled={i !== lastTurn || answering}
+                          onPress={() => chat.pick(choice)}
                         />
                       ))}
                     </View>
@@ -203,57 +166,37 @@ export function ProtonScreen() {
                     </Text>
                   ) : null}
                 </Bubble>
-                {conversationId
+                {chat.conversationId
                   ? turn.cards.map((card) => (
                       <ProtonActionCard
                         key={card.id}
                         action={card}
-                        conversationId={conversationId}
-                        state={actions[card.id] ?? { kind: "open" }}
+                        conversationId={chat.conversationId!}
+                        state={chat.actions[card.id] ?? { kind: "open" }}
                         replaced={isReplaced(card, newest)}
-                        onDecided={(state) => setActions((a) => ({ ...a, [card.id]: state }))}
+                        onDecided={(state) => chat.setAction(card.id, state)}
                       />
                     ))
                   : null}
               </View>
             );
           })}
-          {ask.isPending ? <Bubble from="proton" text={THINKING} /> : null}
+          {live ? (
+            <LiveReply text={live.text?.text ?? null} status={live.status ?? LOOKING} />
+          ) : null}
         </ScrollView>
 
-        <View
-          style={[
-            styles.composer,
-            { borderTopColor: colors.line, backgroundColor: colors.surface },
-          ]}
-        >
-          <View style={styles.row}>
-            <TextInput
-              value={text}
-              onChangeText={setText}
-              placeholder="Ask me anything about the company"
-              placeholderTextColor={colors.ink3}
-              accessibilityLabel="Ask Proton"
-              multiline
-              maxLength={MAX_QUESTION}
-              editable={!blocked}
-              style={[
-                typography.body,
-                styles.input,
-                { color: colors.ink, backgroundColor: colors.surface2, borderColor: colors.line },
-              ]}
-            />
-            <IconButton
-              icon="send"
-              onPress={typed}
-              disabled={!text.trim() || ask.isPending || blocked}
-              accessibilityLabel="Send"
-            />
-          </View>
-          <Text variant="small" tone="muted">
-            {usageLine}
-          </Text>
-        </View>
+        <ProtonComposer
+          text={text}
+          onTextChange={setText}
+          maxLength={MAX_QUESTION}
+          blocked={blocked}
+          answering={answering}
+          onSend={typed}
+          onStop={chat.stop}
+          chips={chips}
+          usageLine={usageLine}
+        />
       </KeyboardAvoidingView>
     </Screen>
   );
@@ -264,15 +207,4 @@ const styles = StyleSheet.create({
   thread: { padding: spacing.l, gap: spacing.m },
   turn: { gap: spacing.s },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: spacing.s },
-  composer: { gap: spacing.xs, padding: spacing.m, borderTopWidth: 1 },
-  row: { flexDirection: "row", alignItems: "flex-end", gap: spacing.s },
-  input: {
-    flex: 1,
-    maxHeight: 120,
-    minHeight: spacing.touch,
-    paddingHorizontal: spacing.row,
-    paddingVertical: spacing.s,
-    borderWidth: 1,
-    borderRadius: radii.input,
-  },
 });

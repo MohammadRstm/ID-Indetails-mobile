@@ -2,12 +2,11 @@ import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 import { http, HttpResponse } from "msw";
 import type { ProtonUiCommand, Schemas } from "@/api/types";
-import { permissionsOf } from "@/permissions/permissions";
+import { takeLogWorkRequest } from "@/features/work/logWorkRequest";
 import { api } from "@test/handlers";
-import { personas } from "@test/personas";
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
-import { planCommands } from "./runCommands";
+import { takeProtonDraft } from "./drafts";
 import { ProtonScreen } from "./screens/ProtonScreen";
 
 jest.mock("expo-router", () => ({
@@ -15,6 +14,11 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: () => ({ about: "project", id: "7", area: "design" }),
 }));
 
+// The live stream: a test says how it answers; the default is that it can't be reached, so the JSON endpoint answers.
+const mockStream = jest.fn();
+jest.mock("expo/fetch", () => ({ fetch: (...args: unknown[]) => mockStream(...args) }));
+
+beforeEach(() => mockStream.mockRejectedValue(new TypeError("Network request failed")));
 afterEach(() => jest.clearAllMocks());
 
 const usage: Schemas["ProtonUsageResponse"] = {
@@ -103,17 +107,20 @@ const pending = card(ACTION);
 
 const asked: unknown[] = [];
 const decided: { path: string; body: unknown }[] = [];
+let briefing: Schemas["ProtonBriefingResponse"] = { items: [], more: 0 };
 
 /** The API answers each question with the next reply (the last one repeats), and every decision with "Done.". */
 function serve(
   replies: Schemas["ProtonReplyResponse"] | Schemas["ProtonReplyResponse"][],
   outcomeCommands: ProtonUiCommand[] = [],
 ) {
+  briefing = { items: [], more: 0 };
   const list = Array.isArray(replies) ? replies : [replies];
   asked.length = 0;
   decided.length = 0;
   server.use(
     http.get(api("/proton/usage"), () => HttpResponse.json(usage)),
+    http.get(api("/proton/briefing"), () => HttpResponse.json(briefing)),
     http.post(api("/proton/messages"), async ({ request }) => {
       asked.push(await request.json());
       return HttpResponse.json(list[Math.min(asked.length, list.length) - 1]);
@@ -433,37 +440,298 @@ describe("Proton's cards", () => {
   });
 });
 
-describe("planCommands", () => {
-  const admin = permissionsOf(personas.designAdmin);
+const encoder = new TextEncoder();
+const event = (name: string, data: unknown) => `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`;
 
-  it("opens a project in a domain the person sees", () => {
-    expect(planCommands([command({})], admin)).toEqual({
-      kind: "go",
-      href: { pathname: "/projects/[id]", params: { id: "7" } },
-      label: "Villa Haddad",
+/** A live stream that delivers these chunks, one read each. */
+function streamOf(...chunks: string[]) {
+  let next = 0;
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({}),
+    body: {
+      getReader: () => ({
+        read: async () =>
+          next < chunks.length
+            ? { done: false, value: encoder.encode(chunks[next++]) }
+            : { done: true },
+        cancel: async () => undefined,
+      }),
+    },
+  };
+}
+
+describe("Proton's live answers", () => {
+  it("shows the answer from the stream and does not ask the JSON endpoint", async () => {
+    serve(reply());
+    mockStream.mockResolvedValue(
+      streamOf(
+        event("status", { text: "Reading the project" }),
+        event("delta", { trip: 1, text: "Villa Haddad is on track." }),
+        event("done", reply()),
+      ),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("How is this project doing?");
+    expect(await screen.findByText("Villa Haddad is on track.")).toBeTruthy();
+    expect(asked).toHaveLength(0);
+    expect(mockStream).toHaveBeenCalledTimes(1);
+    const init = mockStream.mock.calls[0][1] as { body: string };
+    expect(JSON.parse(init.body)).toMatchObject({
+      conversationId: null,
+      text: "How is this project doing?",
+      page: { area: "design", entityType: "project", entityId: 7 },
     });
   });
 
-  it("refuses a domain the person can't see, a bad id and pages that live on the web", () => {
-    expect(planCommands([command({ domain: "execution" })], admin)).toEqual({
-      kind: "unavailable",
-    });
-    expect(planCommands([command({ id: -1 })], admin)).toEqual({ kind: "unavailable" });
+  it("asks the JSON endpoint instead when the stream can't be reached", async () => {
+    serve(reply());
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("How is this project doing?");
+    expect(await screen.findByText("Villa Haddad is on track.")).toBeTruthy();
+    expect(asked).toHaveLength(1);
+  });
+
+  it("says an error that arrives as an event, in Proton's words", async () => {
+    serve(reply());
+    mockStream.mockResolvedValue(
+      streamOf(
+        event("status", { text: "Reading the project" }),
+        event("error", {
+          type: "business_rule",
+          code: "proton_choice_invalid",
+          message: "Nope.",
+          errors: null,
+        }),
+      ),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("the villa");
     expect(
-      planCommands([command({ type: "open_page", id: null, page: "reports" })], admin),
-    ).toEqual({ kind: "unavailable" });
+      await screen.findByText("That option isn't available any more. Could you ask me again?"),
+    ).toBeTruthy();
   });
 
-  it("refuses screens the person's permissions don't open", () => {
-    const employee = permissionsOf(personas.designEmployee);
-    expect(planCommands([command({ type: "open_client", id: 3 })], employee)).toEqual({
-      kind: "unavailable",
+  it("stops an answer on its way and keeps nothing of it", async () => {
+    serve(reply());
+    mockStream.mockImplementation(async (_url: string, init: { signal: AbortSignal }) => {
+      let release = () => {};
+      const blocked = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      init.signal.addEventListener("abort", release);
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({}),
+        body: {
+          getReader: () => ({
+            read: async () => {
+              await blocked;
+              return { done: true };
+            },
+            cancel: async () => release(),
+          }),
+        },
+      };
+    });
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("How is this project doing?");
+    await fireEvent.press(await screen.findByRole("button", { name: "Stop" }));
+    expect(await screen.findByText("Stopped. Nothing from that answer was kept.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Send" })).toBeTruthy();
+    expect(screen.queryByText("Villa Haddad is on track.")).toBeNull();
+    expect(asked).toHaveLength(0);
+  });
+});
+
+describe("Proton's welcome and reply buttons", () => {
+  it("greets, lists what needs a look and asks a starter as an ordinary question", async () => {
+    serve(reply());
+    briefing = {
+      more: 1,
+      items: [
+        {
+          project: { type: "project", id: 7, name: "Villa Haddad", domain: "design" },
+          domain: "design",
+          facts: ["3 requirements are overdue"],
+        },
+      ],
+    };
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    expect(await screen.findByText(/Good (morning|afternoon|evening), Nadia\./)).toBeTruthy();
+    expect(await screen.findByText("3 requirements are overdue")).toBeTruthy();
+    expect(screen.getByText("There is 1 more. Ask me what needs your attention.")).toBeTruthy();
+
+    await fireEvent.press(screen.getByText("Villa Haddad"));
+    expect(router.push).toHaveBeenCalledWith({ pathname: "/projects/[id]", params: { id: "7" } });
+
+    await fireEvent.press(screen.getByRole("button", { name: "How is this project doing?" }));
+    await waitFor(() => expect(asked).toHaveLength(1));
+    expect(asked[0]).toMatchObject({ text: "How is this project doing?" });
+  });
+
+  it("sends a quick reply and a suggestion as what they are, never as text", async () => {
+    serve([
+      reply({
+        reply: "Which period?",
+        quickReplies: [{ reply: "last_month", label: "Last month" }],
+      }),
+      reply({ reply: "Here it is.", suggestions: ["Show overdue projects"] }),
+      reply({ reply: "These are overdue." }),
+    ]);
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("How much did we bill?");
+    await fireEvent.press(await screen.findByRole("button", { name: "Last month" }));
+    await waitFor(() => expect(asked).toHaveLength(2));
+    expect(asked[1]).toMatchObject({ conversationId: CONVERSATION, reply: "last_month" });
+    expect(asked[1]).not.toHaveProperty("text");
+
+    await fireEvent.press(await screen.findByRole("button", { name: "Show overdue projects" }));
+    await waitFor(() => expect(asked).toHaveLength(3));
+    expect(asked[2]).toMatchObject({ conversationId: CONVERSATION, suggestion: 0 });
+    expect(asked[2]).not.toHaveProperty("text");
+    // the buttons belonged to the reply before: the newest has none
+    expect(await screen.findByText("These are overdue.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Show overdue projects" })).toBeNull();
+  });
+
+  it("says when the chat was summed up to carry on", async () => {
+    serve(reply({ rolledOver: true }));
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("Carry on");
+    expect(
+      await screen.findByText(
+        "Our chat was getting long, so I kept a short summary of it and carried on.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("asks a typed question again in a new chat when the old one has ended", async () => {
+    serve(reply());
+    const bodies: unknown[] = [];
+    server.use(
+      http.post(api("/proton/messages"), async ({ request }) => {
+        bodies.push(await request.json());
+        if (bodies.length === 2) {
+          return HttpResponse.json(
+            {
+              type: "not_found",
+              code: "proton_conversation_ended",
+              message: "That chat has ended.",
+              errors: null,
+            },
+            { status: 404 },
+          );
+        }
+        return HttpResponse.json(reply({ reply: bodies.length === 1 ? "First." : "Second." }));
+      }),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("one");
+    expect(await screen.findByText("First.")).toBeTruthy();
+    await ask("two");
+    expect(await screen.findByText("Second.")).toBeTruthy();
+    expect(bodies[1]).toMatchObject({ conversationId: CONVERSATION, text: "two" });
+    expect(bodies[2]).toMatchObject({ conversationId: null, text: "two" });
+    expect(screen.getByText("That chat has ended.")).toBeTruthy();
+  });
+});
+
+describe("Proton's commands on the phone", () => {
+  const fillForm = (change: Partial<Schemas["ProtonFormFill"]>): Schemas["ProtonFormFill"] => ({
+    form: "log_work",
+    id: null,
+    client: null,
+    editProject: null,
+    invite: null,
+    logWork: null,
+    meeting: null,
+    message: null,
+    newProject: null,
+    reportBug: null,
+    ...change,
+  });
+
+  it("opens log work with what Proton filled in, and saves nothing", async () => {
+    serve(
+      reply({
+        uiCommands: [
+          command({ type: "open_surface", surface: "log_work", id: null, label: "Log work" }),
+          command({
+            type: "fill_form",
+            id: null,
+            label: "Log work",
+            fill: fillForm({
+              logWork: {
+                projectId: 7,
+                day: null,
+                startMinute: 540,
+                endMinute: 600,
+                description: null,
+              },
+            }),
+          }),
+        ],
+      }),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "designEmployee" });
+    await ask("Log an hour on the villa from 9");
+    expect(
+      await screen.findByText("Opened Log work. Filled project, start, end: check it and save."),
+    ).toBeTruthy();
+    expect(router.push).toHaveBeenCalledTimes(1);
+    expect(router.push).toHaveBeenCalledWith("/log-work");
+    expect(takeLogWorkRequest()).toEqual({
+      projectId: 7,
+      startMin: 540,
+      endMin: 600,
+      filledByProton: ["project", "start", "end"],
     });
   });
 
-  it("refreshes, and does nothing for no commands", () => {
-    expect(planCommands([command({ type: "refresh" })], admin)).toEqual({ kind: "refresh" });
-    expect(planCommands([], admin)).toBeNull();
-    expect(planCommands(undefined, admin)).toBeNull();
+  it("opens a chat with the message waiting in it, and sends nothing", async () => {
+    serve(
+      reply({
+        uiCommands: [
+          command({
+            type: "fill_form",
+            id: null,
+            domain: null,
+            surface: "message_person",
+            label: "your message",
+            fill: fillForm({ form: "message", id: 9, message: { body: "Running late." } }),
+          }),
+        ],
+      }),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "designEmployee" });
+    await ask("Tell Omar I am running late");
+    expect(await screen.findByText("Wrote your message: read it, then press Send.")).toBeTruthy();
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: "/messages/direct/[userId]",
+      params: { userId: "9" },
+    });
+    expect(takeProtonDraft({ kind: "direct", userId: 9 })).toBe("Running late.");
+  });
+
+  it("says a form the phone doesn't have couldn't be opened here", async () => {
+    serve(
+      reply({
+        uiCommands: [command({ type: "open_surface", surface: "new_project", id: null })],
+      }),
+    );
+    await renderWithProviders(<ProtonScreen />, { persona: "superAdmin" });
+    await ask("Start a new project");
+    expect(await screen.findByText("That couldn't be opened here.")).toBeTruthy();
+    expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it("switches the theme when asked", async () => {
+    serve(reply({ uiCommands: [command({ type: "set_preference", theme: "dark", id: null })] }));
+    await renderWithProviders(<ProtonScreen />, { persona: "designAdmin" });
+    await ask("Go dark");
+    expect(await screen.findByText("Switched to dark mode.")).toBeTruthy();
   });
 });

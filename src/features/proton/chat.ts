@@ -1,4 +1,10 @@
-import type { ProtonChoice, ProtonPendingAction, ProtonRef, ProtonSource } from "./api";
+import type {
+  ProtonChoice,
+  ProtonPendingAction,
+  ProtonQuickReplyOption,
+  ProtonRef,
+  ProtonSource,
+} from "./api";
 
 /** Where a proposed change stands in the chat. Only "open" can still be confirmed. */
 export type ActionState =
@@ -22,7 +28,13 @@ export type ProtonTurn =
       cards: ProtonPendingAction[];
       /** Options to pick from; only the newest reply's can still be picked. */
       choices: ProtonChoice[];
+      /** Answers to Proton's own question (a period, yes or no), as buttons; only the newest reply's can be tapped. */
+      quickReplies: ProtonQuickReplyOption[];
+      /** Things the person might say next; only the newest reply's can be tapped. */
+      suggestions: string[];
       /** What the app did for this reply ("Opened Villa Mounir."), if anything. */
       did: string | null;
     }
+  /** Something the app says about the chat itself: that an answer was stopped, or the chat was summed up. */
+  | { from: "note"; text: string }
   | { from: "error"; text: string };
