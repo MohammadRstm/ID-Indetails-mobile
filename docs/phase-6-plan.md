@@ -162,3 +162,23 @@ Order: 6A → 6B → 6C → 6D → 6E, then 6F if approved. 6A comes first becau
 - **Voice (6F): later.**
 - **Proton for employees:** no answer, so the recommended default applies: a Proton button in the Today header for everyone with `proton:use`, tabs unchanged.
 - **Migrations:** the phone and the website share one dev database, and the 5 Proton migrations belong to the website's work, not the phone's. Whether they are already applied is up to the sessions that wrote them. The phone has no unapplied migrations of its own, and nothing is applied from here.
+
+## Coming from the client portal (not merged yet)
+
+The website session's client portal Phase 1 is open as MohammadRstm/ID-Indetails-api#108 and MohammadRstm/ID-Indetails-client#116 (`docs/client-portal.md` on the API branch `MR-Client-Portal-Accounts`). When those merge, the phone needs:
+
+- **Permission code:** `client_access:manage` (Design only, admins and super admins by default) added to `src/permissions/codes.ts` and its count test (55 codes).
+- **Activity wording:** words for the 6 new activity kinds in the phone's activity feed, which otherwise humanises unknown kinds:
+
+  | Kind | Note |
+  |---|---|
+  | `portal_client_invited` | |
+  | `portal_invitation_resent` | |
+  | `portal_invitation_revoked` | |
+  | `portal_invitation_accepted` | No actor |
+  | `portal_access_granted` | |
+  | `portal_access_revoked` | |
+
+  The payload is `{ email }`.
+
+Nothing else: the staff portal endpoints (`api/projects/{id}/portal/…`) are web-first admin tools, and the client sign-in (`/api/portal/*`, its own token audience) has nothing to do with the staff app.
