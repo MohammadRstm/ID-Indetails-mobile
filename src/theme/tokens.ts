@@ -148,3 +148,34 @@ export const motion = {
   slide: 160,
   toast: 240,
 };
+
+/*
+ * Proton's blob colours (--proton-* in src/styles/client.css in the web client), values verbatim. They are kept
+ * apart from the theme's colours: only the blob uses them.
+ */
+export const protonLight = {
+  body1: "#7FD9CF",
+  body2: "#0C6B69",
+  fur: "#3FA79D",
+  glow: "rgba(54,176,166,.55)",
+  eye: "#04211E",
+  sheen: "rgba(255,255,255,.55)",
+};
+
+export type ProtonColors = typeof protonLight;
+
+export const protonDark: ProtonColors = {
+  body1: "#8EE6DB",
+  body2: "#1F8C84",
+  fur: "#4CC3B8",
+  glow: "rgba(76,195,184,.5)",
+  eye: "#04211E",
+  sheen: "rgba(255,255,255,.45)",
+};
+
+/** What a mood changes in either theme: a sleeping blob goes grey, an upset one red, a happy one glows green. */
+export const protonMoodColors: Record<"asleep" | "error" | "happy", Partial<ProtonColors>> = {
+  asleep: { body1: "#B9C9C6", body2: "#5E7471", fur: "#8A9E9B", glow: "rgba(138,158,155,.3)" },
+  error: { body1: "#F2B8A8", body2: "#B4553F", fur: "#D07A64", glow: "rgba(208,122,100,.45)" },
+  happy: { glow: "rgba(120,230,170,.7)" },
+};
