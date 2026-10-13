@@ -5,7 +5,7 @@ import { fmtDayDate, fmtDur, fmtTime } from "@/format/time";
 import { useTheme } from "@/theme/ThemeProvider";
 import { radii, spacing } from "@/theme/tokens";
 import { Avatar, Icon, Text, type AvatarPhoto } from "@/ui";
-import { mentionParts } from "../model";
+import { mentionParts, VIA_PROTON_LABEL } from "../model";
 
 /** A message on its way: shown at once, confirmed by the answer, or marked for a retry. */
 export type Outgoing = {
@@ -150,7 +150,19 @@ export function MessageBubble({
             <Attachments files={m.attachments} imageSource={imageSource} />
           </View>
         )}
-        <Text variant="small" tone="muted" style={styles.time}>
+        <Text
+          variant="small"
+          tone="muted"
+          style={styles.time}
+          accessibilityLabel={
+            m.viaProton ? `${VIA_PROTON_LABEL}. ${fmtTime(m.createdAt)}` : undefined
+          }
+        >
+          {m.viaProton ? (
+            <Text variant="small" tone="muted" style={[styles.time, styles.via]}>
+              with Proton ·{" "}
+            </Text>
+          ) : null}
           {fmtTime(m.createdAt)}
         </Text>
       </View>
@@ -220,4 +232,5 @@ const styles = StyleSheet.create({
   tile: { width: 120, height: 120, borderRadius: radii.r2 },
   video: { alignItems: "center", justifyContent: "center", gap: spacing.xs },
   time: { fontSize: 11.5, lineHeight: 15 },
+  via: { fontStyle: "italic" },
 });

@@ -2,11 +2,11 @@
 
 The web client can't be changed, so there is no shared package: these modules were copied from it. When the web changes one of them, compare and copy the change here.
 
-Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026).
+Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026). The Proton card modules and the generated types are as of its `main` at `a6ab622` (13 Oct 2026).
 
 | App module | Web source | How it differs |
 |---|---|---|
-| `src/api/schema.d.ts` | `src/api/schema.d.ts` | Unchanged (generated). Regenerate with `npm run api:types` |
+| `src/api/schema.d.ts` | `src/api/schema.d.ts` | Unchanged (generated); copied from the web's `main` at `ac77f93` (13 Oct 2026). Regenerate with `npm run api:types` |
 | `scripts/api-types.mjs` | `scripts/api-types.mjs` | Unchanged |
 | `src/api/errors.ts` | `src/api/errors.ts` | Keeps every message per field (`fieldErrors: Record<string, string[]>`), the `traceId`, and `isApiError`; `errorMessage` and `isStatus` aren't ported |
 | `src/api/http.ts` | `src/api/http.ts` | Same interceptors and array format. The refresh goes through `src/auth/tokenManager.ts` and the mobile endpoints instead of the refresh cookie and a Web Lock; a request refused just after another refresh finished is repeated with the new token |
@@ -25,6 +25,14 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/permissions/permissions.ts` | `src/app/permissions/permissions.ts` | `accessLabel` isn't ported |
 | `src/permissions/screens.ts` | `src/app/routing/routeTable.tsx` | The idea and the rules, rewritten for the phone's routes (one table, no domain in the path) |
 | `src/navigation/targets.ts` (`routeForProtonCommand`) | `src/domains/shared/proton/uiCommands.ts` (`stepOf`) | Same checks, mapped onto the phone's screens; reports and company expenses stay on the web |
+| `src/features/proton/cards.ts` | `src/domains/shared/proton/ActionCard.tsx` (`ARM_MS`, `stateOf`, the phrase and Confirm rules), `ProtonThread.tsx` (`sameChange`, which card a newer one replaces) | The same rules as pure functions so they can be tested alone; the same words, "Medium risk" and "Low risk" included |
+| `src/features/proton/components/ActionCard.tsx`, `screens/ProtonActionCard.tsx` | `src/domains/shared/proton/ActionCard.tsx` | Split into a dumb card and a smart container. The same Review step (Confirm waits 600 ms), "Check carefully" pill, area, reach and "This can't be undone." The red stripe is the left border in `--now`. A wrong phrase from the API keeps the card waiting and says so in the sheet; a `proton_action_not_pending` closes the card so it reads its status from `GET /api/proton/actions` |
+| `src/features/proton/components/PhraseSheet.tsx` | `src/domains/shared/proton/ActionCard.tsx` (the phrase input) | A bottom sheet with the phrase shown above a keyboard field instead of an inline input; Confirm is in the sheet |
+| `src/features/proton/chat.ts` | `src/domains/shared/proton/protonChat.ts` (`ActionState`, `ProtonTurn.cards`) | Only the types the phone uses; the chat is not kept across restarts, and there are no notes, quick replies, suggestions or blocks yet |
+| `src/features/proton/api.ts` | `src/domains/shared/proton/protonApi.ts` (`useDecideAction`, `useMyProtonActions`) | Same requests; the phone has the question and card hooks only |
+| `src/features/proton/errorWords.ts` | — (the web shows the API's message) | The phone words the new Proton codes itself, in the web's voice; other failures keep the API's message |
+| `src/features/proton/refs.ts` | `src/domains/shared/proton/ProtonProvider.tsx` (`linkOf`) | A `team` ref opens that team's chat through the push target `conversation`; a project ref in a domain the person can't see has no link |
+| `src/features/messages/components/MessageBubble.tsx` (`viaProton`) | `src/domains/shared/messages/Thread.tsx` | "with Proton ·" before the time, italic; the tooltip becomes the accessibility label, since touch has none |
 | `src/format/time.ts` | `src/shared/format/time.ts` | Unchanged |
 | `src/format/money.ts` | `src/shared/format/money.ts` | Unchanged |
 | `src/format/periods.ts` | `src/shared/format/periods.ts` | Unchanged |

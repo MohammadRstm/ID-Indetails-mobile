@@ -24,6 +24,7 @@ const sent = {
   mentions: [],
   sender: { id: 4, name: "Sarah Test", photoFileId: null },
   taskComment: null,
+  viaProton: false,
 };
 
 function serveThread() {

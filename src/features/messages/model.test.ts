@@ -23,6 +23,7 @@ const message = (
   mentions: [],
   sender: { id: senderId, name: `Person ${senderId}`, photoFileId: null },
   taskComment: null,
+  viaProton: false,
   ...change,
 });
 

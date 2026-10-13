@@ -135,6 +135,22 @@ const PROTON_PAGES: Record<
   company_overview: { key: "company", pathname: "/company" },
   reports: null,
   company_expenses: null,
+  // Pages added to Proton later. Phase 6B opens the ones the phone has; until then
+  // they read as "That couldn't be opened here".
+  settings: null,
+  notifications: null,
+  messages: null,
+  help: null,
+  schedules: null,
+  salaries: null,
+  project_pay: null,
+  proton_budget: null,
+  company_settings: null,
+  company_profile: null,
+  launcher: null,
+  my_work: null,
+  my_pay: null,
+  my_profile: null,
 };
 
 /**

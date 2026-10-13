@@ -7348,6 +7348,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/proton/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonActionSummaryResponse"][];
+                        "text/json": components["schemas"]["ProtonActionSummaryResponse"][];
+                        "text/plain": components["schemas"]["ProtonActionSummaryResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/proton/actions/{actionId}/cancel": {
         parameters: {
             query?: never;
@@ -7438,6 +7475,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/proton/actions/all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonActionSummaryResponse"][];
+                        "text/json": components["schemas"]["ProtonActionSummaryResponse"][];
+                        "text/plain": components["schemas"]["ProtonActionSummaryResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proton/briefing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonBriefingResponse"];
+                        "text/json": components["schemas"]["ProtonBriefingResponse"];
+                        "text/plain": components["schemas"]["ProtonBriefingResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/proton/budget": {
         parameters: {
             query?: never;
@@ -7518,7 +7629,199 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/proton/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResponseOfProtonConversationSummaryResponse"];
+                        "text/json": components["schemas"]["PagedResponseOfProtonConversationSummaryResponse"];
+                        "text/plain": components["schemas"]["PagedResponseOfProtonConversationSummaryResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/proton/conversations/{conversationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    conversationId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonConversationResponse"];
+                        "text/json": components["schemas"]["ProtonConversationResponse"];
+                        "text/plain": components["schemas"]["ProtonConversationResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    conversationId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    conversationId: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/*+json": components["schemas"]["RenameProtonConversationRequest"];
+                    "application/json": components["schemas"]["RenameProtonConversationRequest"];
+                    "text/json": components["schemas"]["RenameProtonConversationRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonConversationSummaryResponse"];
+                        "text/json": components["schemas"]["ProtonConversationSummaryResponse"];
+                        "text/plain": components["schemas"]["ProtonConversationSummaryResponse"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/proton/memories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonMemoryResponse"][];
+                        "text/json": components["schemas"]["ProtonMemoryResponse"][];
+                        "text/plain": components["schemas"]["ProtonMemoryResponse"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/*+json": components["schemas"]["SaveProtonMemoryRequest"];
+                    "application/json": components["schemas"]["SaveProtonMemoryRequest"];
+                    "text/json": components["schemas"]["SaveProtonMemoryRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonMemoryResponse"];
+                        "text/json": components["schemas"]["ProtonMemoryResponse"];
+                        "text/plain": components["schemas"]["ProtonMemoryResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proton/memories/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -7533,7 +7836,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    conversationId: string;
+                    id: number;
                 };
                 cookie?: never;
             };
@@ -7596,6 +7899,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/proton/messages/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/*+json": components["schemas"]["AskProtonRequest"];
+                    "application/json": components["schemas"]["AskProtonRequest"];
+                    "text/json": components["schemas"]["AskProtonRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/event-stream": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/proton/usage": {
         parameters: {
             query?: never;
@@ -7627,6 +7971,84 @@ export interface paths {
         };
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proton/voice/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/*+json": components["schemas"]["StartProtonVoiceRequest"];
+                    "application/json": components["schemas"]["StartProtonVoiceRequest"];
+                    "text/json": components["schemas"]["StartProtonVoiceRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProtonVoiceSessionResponse"];
+                        "text/json": components["schemas"]["ProtonVoiceSessionResponse"];
+                        "text/plain": components["schemas"]["ProtonVoiceSessionResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/proton/voice/sessions/{sessionId}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    sessionId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -8561,7 +8983,11 @@ export interface components {
             /** Format: uuid */
             conversationId?: null | string;
             page?: null | components["schemas"]["ProtonPageContext"];
+            reply?: null | components["schemas"]["ProtonQuickReply"];
+            /** Format: int32 */
+            suggestion?: null | number;
             text?: string;
+            voice?: null | components["schemas"]["ProtonVoiceTurnRequest"];
         };
         AttachFileRequest: {
             /** Format: int64 */
@@ -8801,6 +9227,13 @@ export interface components {
             clientId: number;
             kind: components["schemas"]["ContactKind"];
             name: string;
+        };
+        ClientFill: {
+            email: null | string;
+            name: null | string;
+            note: null | string;
+            organisation: null | string;
+            phone: null | string;
         };
         /** @enum {unknown} */
         ClientFilter: "active" | "owing" | "empty" | null;
@@ -9210,6 +9643,7 @@ export interface components {
         DecideProtonActionRequest: {
             /** Format: uuid */
             conversationId?: string;
+            typed?: null | string;
         };
         /** @enum {unknown} */
         DeliveryChannel: "email" | "whatsapp" | "download";
@@ -9261,6 +9695,13 @@ export interface components {
             /** Format: date-time */
             updatedAt: null | string;
             weeklySummary: boolean;
+        };
+        EditProjectFill: {
+            description: null | string;
+            location: null | string;
+            /** Format: date */
+            targetDate: null | string;
+            title: null | string;
         };
         /** @enum {unknown} */
         EditWindow: "none" | "one_day" | "seven_days" | "unlimited";
@@ -9593,6 +10034,16 @@ export interface components {
         InvitationTokenRequest: {
             token?: string;
         };
+        InviteFill: {
+            /** @description Only an address the user typed in this conversation. */
+            email: null | string;
+            position: null | string;
+            /**
+             * Format: int64
+             * @description A team id from find_recipient or another tool.
+             */
+            teamId: null | number;
+        };
         InvoiceClientResponse: {
             displayName: string;
             /** Format: int64 */
@@ -9806,6 +10257,23 @@ export interface components {
             email?: string;
             password?: string;
         };
+        LogWorkFill: {
+            /** Format: date */
+            day: null | string;
+            description: null | string;
+            /** Format: int32 */
+            endMinute: null | number;
+            /**
+             * Format: int64
+             * @description The project: an id from find, list_my_work or another tool.
+             */
+            projectId: null | number;
+            /**
+             * Format: int32
+             * @description Minutes after midnight, company time: 9:30 is 570.
+             */
+            startMinute: null | number;
+        };
         MaterialEntryRequest: {
             /** Format: double */
             amount?: null | number;
@@ -9886,6 +10354,24 @@ export interface components {
             key: string;
             label: string;
         };
+        MeetingFill: {
+            /** Format: date */
+            day: null | string;
+            description: null | string;
+            /** Format: int32 */
+            endMinute: null | number;
+            /**
+             * Format: int64
+             * @description The project it is about: an id from find or another tool.
+             */
+            projectId: null | number;
+            /**
+             * Format: int32
+             * @description Minutes after midnight, company time: 9:30 is 570.
+             */
+            startMinute: null | number;
+            topic: null | string;
+        };
         MeetingPersonResponse: {
             /** Format: int64 */
             id: number;
@@ -9916,6 +10402,10 @@ export interface components {
             /** Format: date-time */
             updatedAt: null | string;
         };
+        MessageFill: {
+            /** @description The message, in the user's voice, from what the user said: they read it and press Send themselves. */
+            body: string;
+        };
         MessagePageResponse: {
             hasMore: boolean;
             items: components["schemas"]["MessageResponse"][];
@@ -9931,6 +10421,8 @@ export interface components {
             mentions: components["schemas"]["ChatPersonResponse"][];
             sender: components["schemas"]["ChatPersonResponse"];
             taskComment: null | components["schemas"]["TaskCommentResponse"];
+            /** @default false */
+            viaProton: boolean;
         };
         MessagesBadgeResponse: {
             mention: boolean;
@@ -10266,6 +10758,18 @@ export interface components {
             /** Format: double */
             unitCost?: null | number;
         };
+        NewProjectFill: {
+            /**
+             * Format: int64
+             * @description An id from find or another tool.
+             */
+            clientId: null | number;
+            description: null | string;
+            location: null | string;
+            /** Format: date */
+            targetDate: null | string;
+            title: null | string;
+        };
         NotificationProjectResponse: {
             domain: string;
             icon: null | string;
@@ -10508,6 +11012,15 @@ export interface components {
         };
         PagedResponseOfProjectSummaryResponse: {
             items: components["schemas"]["ProjectSummaryResponse"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+        };
+        PagedResponseOfProtonConversationSummaryResponse: {
+            items: components["schemas"]["ProtonConversationSummaryResponse"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -11116,6 +11629,51 @@ export interface components {
         ProtonActionRisk: "low" | "medium";
         /** @enum {unknown} */
         ProtonActionStatus: "pending" | "executing" | "succeeded" | "failed" | "cancelled" | "superseded" | "expired";
+        ProtonActionSummaryResponse: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            decidedAt: null | string;
+            errorMessage: null | string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int64 */
+            resultId: null | number;
+            resultType: null | string;
+            status: components["schemas"]["ProtonActionStatus"];
+            title: string;
+            tool: string;
+            who: null | string;
+        };
+        ProtonBlock: {
+            chart: null | components["schemas"]["ProtonChartBlock"];
+            id: string;
+            kpis: null | components["schemas"]["ProtonKpiBlock"];
+            notes: string[];
+            period: null | string;
+            source: components["schemas"]["ProtonBlockSource"];
+            table: null | components["schemas"]["ProtonTableBlock"];
+            title: string;
+            type: components["schemas"]["ProtonBlockType"];
+        };
+        ProtonBlockSource: {
+            /** Format: date-time */
+            asOf: string;
+            dataset: string;
+            tool: string;
+        };
+        /** @enum {unknown} */
+        ProtonBlockType: "chart" | "table" | "kpis";
+        ProtonBriefingItem: {
+            domain: null | string;
+            facts: string[];
+            project: null | components["schemas"]["ProtonRef"];
+        };
+        ProtonBriefingResponse: {
+            items: components["schemas"]["ProtonBriefingItem"][];
+            /** Format: int32 */
+            more: number;
+        };
         ProtonBudgetResponse: {
             /** Format: double */
             budgetUsd: number;
@@ -11140,11 +11698,26 @@ export interface components {
             topUpsUsd: number;
             /** Format: int32 */
             usedPct: number;
+            voice: components["schemas"]["ProtonVoiceUsageResponse"];
+        };
+        ProtonCell: {
+            /** Format: date */
+            date: null | string;
+            /** Format: double */
+            number: null | number;
+            text: null | string;
         };
         ProtonChange: {
             after: string;
             before: null | string;
             label: string;
+        };
+        ProtonChartBlock: {
+            axis: components["schemas"]["ProtonColumnKind"];
+            axisLabel: string;
+            kind: components["schemas"]["ProtonPresentForm"];
+            points: components["schemas"]["ProtonPoint"][];
+            series: components["schemas"]["ProtonSeries"][];
         };
         ProtonChoice: {
             detail: null | string;
@@ -11159,6 +11732,44 @@ export interface components {
             id?: number;
             type?: components["schemas"]["ProtonRefType"];
         };
+        ProtonColumn: {
+            key: string;
+            kind: components["schemas"]["ProtonColumnKind"];
+            label: string;
+            unit: null | components["schemas"]["ProtonUnit"];
+        };
+        /** @enum {unknown} */
+        ProtonColumnKind: "text" | "status" | "date" | "week" | "month" | "number";
+        /** @enum {unknown} */
+        ProtonCompanyTab: "overview" | "people" | "teams" | null;
+        /**
+         * @default standard
+         * @enum {unknown}
+         */
+        ProtonConfirm: "standard" | "two_step" | "typed";
+        ProtonConversationResponse: {
+            canContinue: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            hidden: null | string;
+            /** Format: uuid */
+            id: string;
+            messages: components["schemas"]["ProtonStoredMessageResponse"][];
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ProtonConversationSummaryResponse: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: int32 */
+            messageCount: number;
+            title: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         ProtonConversationUsageResponse: {
             /** Format: uuid */
             conversationId: string;
@@ -11171,6 +11782,12 @@ export interface components {
             toolCalls: number;
             /** Format: int64 */
             userId: number;
+        };
+        ProtonDataRow: {
+            cells: components["schemas"]["ProtonCell"][];
+            /** @default false */
+            partial: boolean;
+            ref: null | components["schemas"]["ProtonRef"];
         };
         ProtonDayUsageResponse: {
             /** Format: double */
@@ -11190,7 +11807,47 @@ export interface components {
         /** @enum {unknown} */
         ProtonFinancialsTab: "overview" | "projects" | "clients" | "billing" | "costs" | null;
         /** @enum {unknown} */
-        ProtonPage: "dashboard" | "projects" | "clients" | "people" | "financials" | "meetings" | "activity" | "reports" | "company_overview" | "company_expenses" | null;
+        ProtonForm: "client" | "meeting" | "new_project" | "edit_project" | "report_bug" | "invite" | "message" | "log_work";
+        ProtonFormFill: {
+            client: null | components["schemas"]["ClientFill"];
+            editProject: null | components["schemas"]["EditProjectFill"];
+            form: components["schemas"]["ProtonForm"];
+            /** Format: int64 */
+            id: null | number;
+            invite: null | components["schemas"]["InviteFill"];
+            logWork: null | components["schemas"]["LogWorkFill"];
+            meeting: null | components["schemas"]["MeetingFill"];
+            message: null | components["schemas"]["MessageFill"];
+            newProject: null | components["schemas"]["NewProjectFill"];
+            reportBug: null | components["schemas"]["ReportBugFill"];
+        };
+        ProtonKpi: {
+            /** Format: double */
+            change: null | number;
+            key: string;
+            label: string;
+            /** Format: double */
+            previous: null | number;
+            unit: components["schemas"]["ProtonUnit"];
+            /** Format: double */
+            value: null | number;
+        };
+        ProtonKpiBlock: {
+            items: components["schemas"]["ProtonKpi"][];
+        };
+        ProtonMemoryResponse: {
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: int64 */
+            id: number;
+            text: string;
+        };
+        /** @enum {unknown} */
+        ProtonMessageOrigin: "typed" | "choice" | "suggestion" | "spoken" | null;
+        /** @enum {unknown} */
+        ProtonMessageRole: "user" | "proton";
+        /** @enum {unknown} */
+        ProtonPage: "dashboard" | "projects" | "clients" | "people" | "financials" | "meetings" | "activity" | "reports" | "company_overview" | "company_expenses" | "settings" | "notifications" | "messages" | "help" | "schedules" | "salaries" | "project_pay" | "proton_budget" | "company_settings" | "company_profile" | "launcher" | "my_work" | "my_pay" | "my_profile" | null;
         ProtonPageContext: {
             area: string;
             /** Format: int64 */
@@ -11198,6 +11855,7 @@ export interface components {
             entityType: null | components["schemas"]["ProtonRefType"];
             page: null | components["schemas"]["ProtonPage"];
             section: null | components["schemas"]["ProtonProjectSection"];
+            surface: null | components["schemas"]["ProtonSurface"];
         };
         ProtonPendingAction: {
             /** Format: date-time */
@@ -11206,16 +11864,38 @@ export interface components {
             id: string;
             preview: components["schemas"]["ProtonPreview"];
             risk: components["schemas"]["ProtonActionRisk"];
+            target: null | components["schemas"]["ProtonRef"];
             tool: string;
         };
+        ProtonPoint: {
+            label: string;
+            /** @default false */
+            partial: boolean;
+            ref: null | components["schemas"]["ProtonRef"];
+            values: (null | number)[];
+        };
+        /** @enum {unknown} */
+        ProtonPresentForm: "bar" | "columns" | "line" | "composition" | "kpis" | "table";
         ProtonPreview: {
+            area: null | string;
             changes: components["schemas"]["ProtonChange"][];
+            confirm: components["schemas"]["ProtonConfirm"];
+            /** @default false */
+            irreversible: boolean;
             note: null | string;
             opensAfter: null | string;
+            phrase: null | string;
+            reach: null | string;
             title: string;
         };
         /** @enum {unknown} */
-        ProtonProjectSection: "overview" | "requirements" | "timeline" | "meetings" | null;
+        ProtonProjectSection: "financials" | "overview" | "analytics" | "contributors" | "requirements" | "timeline" | "meetings" | null;
+        /** @enum {unknown} */
+        ProtonQuickReply: "yes" | "no" | "design" | "execution" | "today" | "this_week" | "last_week" | "this_month" | "last_month" | "this_quarter" | "last_quarter" | "this_year" | "last_year";
+        ProtonQuickReplyOption: {
+            label: string;
+            reply: components["schemas"]["ProtonQuickReply"];
+        };
         ProtonRef: {
             domain: null | string;
             /** Format: int64 */
@@ -11224,19 +11904,32 @@ export interface components {
             type: components["schemas"]["ProtonRefType"];
         };
         /** @enum {unknown} */
-        ProtonRefType: "project" | "client" | "person";
+        ProtonRefType: "project" | "client" | "person" | "team";
         ProtonReplyResponse: {
+            blocks: components["schemas"]["ProtonBlock"][];
             choices: components["schemas"]["ProtonChoice"][];
             /** Format: uuid */
             conversationId: string;
             limited: boolean;
             pendingAction: null | components["schemas"]["ProtonPendingAction"];
+            pendingActions: components["schemas"]["ProtonPendingAction"][];
+            quickReplies: components["schemas"]["ProtonQuickReplyOption"][];
             refs: components["schemas"]["ProtonRef"][];
             reply: string;
+            /** @default false */
+            rolledOver: boolean;
             sources: components["schemas"]["ProtonSourceResponse"][];
+            suggestions: string[];
             uiCommands: components["schemas"]["ProtonUiCommand"][];
             usage: components["schemas"]["ProtonUsageResponse"];
         };
+        ProtonSeries: {
+            key: string;
+            label: string;
+            unit: components["schemas"]["ProtonUnit"];
+        };
+        /** @enum {unknown} */
+        ProtonSettingsSection: "general" | "time" | "finance" | "projects" | "notifications" | "teams" | "admins" | "data" | null;
         ProtonSourceResponse: {
             comparedWith: null | string;
             label: string;
@@ -11245,6 +11938,34 @@ export interface components {
             period: null | string;
             scope: null | string;
         };
+        ProtonStoredCardResponse: {
+            card: components["schemas"]["ProtonPendingAction"];
+            message: null | string;
+            status: components["schemas"]["ProtonActionStatus"];
+        };
+        ProtonStoredMessageResponse: {
+            blocks: components["schemas"]["ProtonBlock"][];
+            cards: components["schemas"]["ProtonStoredCardResponse"][];
+            /** Format: date-time */
+            createdAt: string;
+            origin: null | components["schemas"]["ProtonMessageOrigin"];
+            refs: components["schemas"]["ProtonRef"][];
+            role: components["schemas"]["ProtonMessageRole"];
+            /** Format: int32 */
+            seq: number;
+            sources: components["schemas"]["ProtonSourceResponse"][];
+            text: string;
+        };
+        /** @enum {unknown} */
+        ProtonSurface: "new_project" | "new_client" | "invite_person" | "edit_project" | "edit_client" | "project_report" | "project_payment_terms" | "add_project_expense" | "site_pricing" | "new_invoice" | "record_payment" | "new_statement" | "new_meeting" | "add_company_expense" | "message_person" | "message_team" | "log_work" | "report_bug" | "settings_section" | "company_overview_tab" | null;
+        ProtonTableBlock: {
+            columns: components["schemas"]["ProtonColumn"][];
+            rows: components["schemas"]["ProtonDataRow"][];
+            /** Format: int32 */
+            totalRows: number;
+        };
+        /** @enum {unknown} */
+        ProtonTheme: "light" | "dark" | null;
         ProtonToolUsageResponse: {
             /** Format: int32 */
             averageMs: number;
@@ -11269,17 +11990,25 @@ export interface components {
         ProtonUiCommand: {
             /** Format: int64 */
             clientId: null | number;
+            companyTab: null | components["schemas"]["ProtonCompanyTab"];
             domain: null | string;
+            fill: null | components["schemas"]["ProtonFormFill"];
             /** Format: int64 */
             id: null | number;
             label: string;
             page: null | components["schemas"]["ProtonPage"];
             section: null | components["schemas"]["ProtonProjectSection"];
+            settingsSection: null | components["schemas"]["ProtonSettingsSection"];
+            sounds: null | boolean;
+            surface: null | components["schemas"]["ProtonSurface"];
             tab: null | components["schemas"]["ProtonFinancialsTab"];
+            theme: null | components["schemas"]["ProtonTheme"];
             type: components["schemas"]["ProtonUiCommandType"];
         };
         /** @enum {unknown} */
-        ProtonUiCommandType: "open_project" | "open_client" | "open_person" | "open_page" | "refresh";
+        ProtonUiCommandType: "open_project" | "open_client" | "open_person" | "open_page" | "open_surface" | "fill_form" | "set_preference" | "refresh";
+        /** @enum {unknown} */
+        ProtonUnit: "hours" | "usd" | "count" | "percent" | "days";
         ProtonUsageResponse: {
             available: boolean;
             companyLimitReached: boolean;
@@ -11293,6 +12022,13 @@ export interface components {
             questionsUsed: number;
             /** Format: int32 */
             usedPct: number;
+            /** @default false */
+            voiceAvailable: boolean;
+            /**
+             * Format: int32
+             * @default 0
+             */
+            voiceMaxMinutes: number;
         };
         ProtonUserUsageResponse: {
             /** Format: double */
@@ -11304,6 +12040,29 @@ export interface components {
             tokens: number;
             /** Format: int64 */
             userId: number;
+        };
+        ProtonVoiceSessionResponse: {
+            /** Format: uuid */
+            conversationId: string;
+            /** Format: date-time */
+            endsAt: string;
+            sdp: string;
+            sessionId: string;
+        };
+        ProtonVoiceTurnRequest: {
+            delegationId?: string;
+            sessionId?: string;
+        };
+        ProtonVoiceUsageResponse: {
+            /** Format: double */
+            costUsd: number;
+            /** Format: int32 */
+            estimated: number;
+            /** Format: double */
+            minutes: number;
+            model: string;
+            /** Format: int32 */
+            sessions: number;
         };
         QuarterTotalResponse: {
             /** Format: int32 */
@@ -11334,8 +12093,16 @@ export interface components {
             receivedOn?: null | string;
             reference?: null | string;
         };
+        RenameProtonConversationRequest: {
+            title?: string;
+        };
         RenameTeamRequest: {
             name?: string;
+        };
+        ReportBugFill: {
+            description: null | string;
+            steps: null | string;
+            title: null | string;
         };
         ReportBugRequest: {
             description?: string;
@@ -11681,6 +12448,11 @@ export interface components {
             startsAt?: string;
             topic?: null | string;
         };
+        SaveProtonMemoryRequest: {
+            /** Format: uuid */
+            conversationId?: string;
+            text?: string;
+        };
         SaveRequirementRequest: {
             assigneeIds?: number[];
             /** Format: date */
@@ -11877,9 +12649,9 @@ export interface components {
         };
         SiteSummaryResponse: {
             /** Format: double */
-            groundLabour: number;
+            groundLabour: null | number;
             /** Format: double */
-            materialCost: number;
+            materialCost: null | number;
             /** Format: int32 */
             materialCount: number;
             /** Format: date-time */
@@ -11893,6 +12665,11 @@ export interface components {
             /** Format: int32 */
             count: number;
             people: components["schemas"]["PersonRefResponse"][];
+        };
+        StartProtonVoiceRequest: {
+            /** Format: uuid */
+            conversationId?: null | string;
+            sdp?: string;
         };
         StatementDeliveryResponse: {
             channel: components["schemas"]["DeliveryChannel"];
