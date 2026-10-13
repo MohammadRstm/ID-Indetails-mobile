@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toApiError } from "@/api/errors";
 import type { WorkEntry } from "@/api/types";
 import { useCurrentUser } from "@/auth/session";
+import { FilledNote } from "@/features/proton/components/FilledNote";
 import { startTimer } from "@/features/timer/actions";
 import { removeRun } from "@/features/timer/store";
 import { companyToday, dayKey, fmtDayDate, fmtDur, fmtRange, minutesOfDay } from "@/format/time";
@@ -292,6 +293,7 @@ function LogWorkForm({
       descriptionRequired={settings.requireDescription}
       descriptionError={touched && needsDescription ? "Say what you worked on." : undefined}
       shortTimer={request.shortTimer}
+      notice={request.filledByProton ? <FilledNote fields={request.filledByProton} /> : undefined}
       attachment={
         <AttachmentField
           photo={attachment.photo}

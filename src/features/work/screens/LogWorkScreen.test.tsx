@@ -126,3 +126,28 @@ it("says so when the overlap is with another entry", async () => {
   expect(await screen.findByText("This overlaps another of your entries.")).toBeTruthy();
   expect(router.back).not.toHaveBeenCalled();
 });
+
+it("says what Proton filled in, and logs nothing until the person saves", async () => {
+  serveDay();
+  let posted = 0;
+  server.use(
+    http.post(api("/work-entries"), () => {
+      posted += 1;
+      return HttpResponse.json(workEntry(50, isoAt(yesterday, 600), isoAt(yesterday, 660)), {
+        status: 201,
+      });
+    }),
+  );
+  requestLogWork({
+    projectId: 1,
+    date: yesterday,
+    startMin: 600,
+    endMin: 660,
+    filledByProton: ["project", "day", "start", "end"],
+  });
+  await renderWithProviders(<LogWorkScreen />);
+  expect(
+    await screen.findByText("Filled by Proton: project, day, start, end. Check them, then save."),
+  ).toBeTruthy();
+  expect(posted).toBe(0);
+});

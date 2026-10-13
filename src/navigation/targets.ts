@@ -10,7 +10,8 @@ import { canOpen, type ScreenKey } from "@/permissions/screens";
  * screen their permissions refuse all give null, and the caller opens Alerts instead. Links only open screens.
  */
 
-const isId = (v: unknown): v is number => typeof v === "number" && Number.isSafeInteger(v) && v > 0;
+export const isId = (v: unknown): v is number =>
+  typeof v === "number" && Number.isSafeInteger(v) && v > 0;
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** The screen's href when this person may open it, otherwise null. */
@@ -120,7 +121,7 @@ export function routeForTarget(target: PushTarget, perms: Permissions): Href | n
   }
 }
 
-// Proton's pages and where they live on the phone. Reports and company expenses stay on the web.
+// Proton's pages and where they live on the phone. Reports, company expenses, help and the company tools stay on the web.
 const PROTON_PAGES: Record<
   NonNullable<ProtonUiCommand["page"]>,
   { key: ScreenKey; pathname: string } | null
@@ -135,11 +136,12 @@ const PROTON_PAGES: Record<
   company_overview: { key: "company", pathname: "/company" },
   reports: null,
   company_expenses: null,
-  // Pages added to Proton later. Phase 6B opens the ones the phone has; until then
-  // they read as "That couldn't be opened here".
-  settings: null,
-  notifications: null,
-  messages: null,
+  settings: { key: "settings", pathname: "/settings" },
+  notifications: { key: "alerts", pathname: "/alerts" },
+  messages: { key: "messages", pathname: "/messages" },
+  my_work: { key: "work", pathname: "/work" },
+  my_pay: { key: "pay", pathname: "/pay" },
+  my_profile: { key: "profile", pathname: "/profile" },
   help: null,
   schedules: null,
   salaries: null,
@@ -148,17 +150,45 @@ const PROTON_PAGES: Record<
   company_settings: null,
   company_profile: null,
   launcher: null,
-  my_work: null,
-  my_pay: null,
-  my_profile: null,
 };
 
 /**
- * Where one of Proton's navigation commands opens on the phone, or null ("refresh", or nothing to open here).
- * The API sends names, never addresses; the route is built here from the app's own screen table.
+ * Where a form or dialog Proton names opens on the phone, or null: the surfaces the phone has no screen for
+ * stay on the web. Only the screen opens; nothing is filled or saved. `id` is the person or team of a chat.
+ */
+export function routeForProtonSurface(
+  ask: Pick<ProtonUiCommand, "surface" | "id" | "domain">,
+  perms: Permissions,
+): Href | null {
+  if (ask.domain != null && !perms.canSeeDomain(ask.domain)) return null;
+  switch (ask.surface) {
+    // Logged hours are Design's only, as on the web.
+    case "log_work":
+      return perms.canSeeDomain("design") ? open(perms, "logWork", "/log-work") : null;
+    case "new_meeting":
+      return open(perms, "newMeeting", "/meetings/new");
+    case "message_person":
+      return routeForTarget({ type: "conversation", userId: ask.id ?? undefined }, perms);
+    case "message_team":
+      return routeForTarget({ type: "conversation", teamId: ask.id ?? undefined }, perms);
+    case "record_payment":
+      return open(perms, "newPayment", "/billing/payments/new");
+    case "settings_section":
+      return open(perms, "settings", "/settings");
+    default:
+      return null;
+  }
+}
+
+/**
+ * Where one of Proton's navigation commands opens on the phone, or null ("refresh", a display choice, a form
+ * fill, or nothing to open here). The API sends names, never addresses; the route is built here from the app's
+ * own screen table.
  */
 export function routeForProtonCommand(cmd: ProtonUiCommand, perms: Permissions): Href | null {
   switch (cmd.type) {
+    case "open_surface":
+      return routeForProtonSurface(cmd, perms);
     case "open_project":
       return project(perms, cmd.id, cmd.domain, cmd.section);
     case "open_client":

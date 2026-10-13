@@ -19,6 +19,8 @@ export type LogWorkRequest = {
   runId?: string;
   /** Editing this entry instead of logging a new one. */
   edit?: WorkEntry;
+  /** What Proton filled in, by name, for the form to say so. The person still checks and saves it. */
+  filledByProton?: string[];
 };
 
 let pending: LogWorkRequest | null = null;

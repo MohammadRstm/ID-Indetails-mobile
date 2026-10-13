@@ -43,6 +43,8 @@ type LogWorkViewProps = {
   /** How long a short timer run really was, when it is logged as 5 minutes. */
   shortTimer?: number;
   attachment: ReactNode;
+  /** A note above the form, such as what Proton filled in. */
+  notice?: ReactNode;
   /** What stops the save, in words. */
   problem: string | null;
   saving: boolean;
@@ -60,6 +62,7 @@ export function LogWorkView(props: LogWorkViewProps) {
 
   return (
     <View style={styles.form}>
+      {props.notice}
       <Select
         label="Project"
         value={props.projectId}
