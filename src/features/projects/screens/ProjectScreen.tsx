@@ -99,7 +99,8 @@ function ProjectView({ project: p, requested, banner, refreshing, onRefresh }: P
   const perms = usePermissions();
   const open = p.status === "active" || p.status === "hold";
   const sections = projectSections({ domain: p.domain, hasMoney: p.money != null, has: perms.has });
-  const scroll = useSectionScroll(sectionToShow(requested, sections));
+  const opened = sectionToShow(requested, sections);
+  const scroll = useSectionScroll(opened);
 
   return (
     <Screen
@@ -108,7 +109,7 @@ function ProjectView({ project: p, requested, banner, refreshing, onRefresh }: P
           title={p.title}
           subtitle={p.client?.displayName ?? "Internal project"}
           onBack={back}
-          actions={<AdminProjectActions project={p} />}
+          actions={<AdminProjectActions project={p} section={opened} />}
         />
       }
       banner={banner}

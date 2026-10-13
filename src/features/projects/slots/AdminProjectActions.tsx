@@ -4,7 +4,7 @@ import { toApiError } from "@/api/errors";
 import type { Project, ProjectStatus } from "@/api/types";
 import { personName, useEmployees } from "@/features/people/api";
 import { PeoplePickerSheet } from "@/features/people/components/PeoplePickerSheet";
-import { protonHrefFor } from "@/features/proton/pageContext";
+import { protonHrefFor, type ProtonSection } from "@/features/proton/pageContext";
 import { P } from "@/permissions/codes";
 import { canOpen } from "@/permissions/screens";
 import { usePermissions } from "@/permissions/usePermissions";
@@ -17,7 +17,8 @@ import {
   type StatusAction,
 } from "./projectAdminApi";
 
-export type AdminProjectActionsProps = { project: Project };
+/** `section` is the part of the project the screen opened on, so Proton knows what "this" is. */
+export type AdminProjectActionsProps = { project: Project; section?: ProtonSection | null };
 
 const STATUS_AFTER: Record<StatusAction, ProjectStatus> = {
   hold: "hold",
@@ -95,7 +96,7 @@ function statusErrorText(error: unknown): string {
  * (project:edit), open its activity and ask Proton about it. Each status change is confirmed first; the API checks
  * every rule again.
  */
-export function AdminProjectActions({ project }: AdminProjectActionsProps) {
+export function AdminProjectActions({ project, section }: AdminProjectActionsProps) {
   const perms = usePermissions();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirming, setConfirming] = useState<StatusAction | null>(null);
@@ -207,7 +208,9 @@ export function AdminProjectActions({ project }: AdminProjectActionsProps) {
             : undefined
         }
         onAskProton={
-          canAsk ? () => go(protonHrefFor("project", project.id, project.domain)) : undefined
+          canAsk
+            ? () => go(protonHrefFor("project", project.id, project.domain, section))
+            : undefined
         }
       />
       <ConfirmDialog

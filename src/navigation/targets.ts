@@ -31,19 +31,23 @@ const PROJECT_SECTIONS = {
   labour: { key: "labourWeeks", pathname: "/projects/[id]/labour" },
 } as const satisfies Record<string, { key: ScreenKey; pathname: string }>;
 
+// Parts of the project screen itself; it scrolls to the one asked for and ignores one the person can't see.
+const PROJECT_SCREEN_SECTIONS = ["financials", "overview", "contributors", "meetings"] as const;
+
 function project(perms: Permissions, id: unknown, domain: unknown, section?: unknown): Href | null {
   if (!isId(id) || typeof domain !== "string" || !perms.canSeeDomain(domain)) return null;
   const params = { id: String(id) };
+  // Requirements, materials and labour have screens of their own with the full lists.
   if (section === "requirements" || section === "materials" || section === "labour") {
     const { key, pathname } = PROJECT_SECTIONS[section];
     return open(perms, key, pathname, params);
   }
-  // Meetings are a section of the project screen itself.
+  const onScreen = PROJECT_SCREEN_SECTIONS.find((s) => s === section);
   return open(
     perms,
     "project",
     "/projects/[id]",
-    section === "meetings" ? { ...params, section } : params,
+    onScreen ? { ...params, section: onScreen } : params,
   );
 }
 

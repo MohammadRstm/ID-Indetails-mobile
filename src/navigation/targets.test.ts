@@ -262,6 +262,17 @@ describe("routeForProtonCommand", () => {
     });
   });
 
+  it("hands the project screen's own sections on to scroll to, and drops the web-only ones", () => {
+    const p = perms("designAdmin");
+    const open = (section: ProtonUiCommand["section"]) =>
+      routeForProtonCommand(command({ type: "open_project", id: 8, domain: "design", section }), p);
+    for (const section of ["financials", "overview", "contributors", "meetings"] as const) {
+      expect(open(section)).toEqual({ pathname: "/projects/[id]", params: { id: "8", section } });
+    }
+    expect(open("analytics")).toEqual({ pathname: "/projects/[id]", params: { id: "8" } });
+    expect(open("timeline")).toEqual({ pathname: "/projects/[id]", params: { id: "8" } });
+  });
+
   it("refuses a project in a domain the person can't see", () => {
     expect(
       routeForProtonCommand(

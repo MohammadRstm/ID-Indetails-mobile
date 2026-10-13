@@ -136,14 +136,20 @@ describe("planCommands", () => {
     expect(surface("report_bug")).toEqual([{ kind: "unavailable" }]);
   });
 
-  it("opens a section of a project: a screen of its own, or else the project", () => {
+  it("opens a section of a project: a screen of its own, or else the project scrolled to it", () => {
     const section = (name: ProtonUiCommand["section"]) =>
       planCommands([command({ section: name })], admin)[0];
     expect(section("requirements")).toMatchObject({
       href: { pathname: "/projects/[id]/requirements", params: { id: "7" } },
     });
-    const others = ["financials", "analytics", "contributors", "timeline", "overview"] as const;
-    for (const name of others) {
+    for (const name of ["financials", "contributors", "overview", "meetings"] as const) {
+      expect(section(name)).toMatchObject({
+        kind: "go",
+        href: { pathname: "/projects/[id]", params: { id: "7", section: name } },
+      });
+    }
+    // The web keeps analytics and the timeline: the project opens at the top.
+    for (const name of ["analytics", "timeline"] as const) {
       expect(section(name)).toMatchObject({
         kind: "go",
         href: { pathname: "/projects/[id]", params: { id: "7" } },

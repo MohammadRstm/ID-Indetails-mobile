@@ -173,6 +173,18 @@ describe("AdminProjectActions", () => {
     });
   });
 
+  it("tells Proton which section the screen opened on", async () => {
+    await renderWithProviders(<AdminProjectActions project={aProject()} section="financials" />, {
+      persona: "designAdmin",
+    });
+    await openMenu();
+    await fireEvent.press(screen.getByRole("button", { name: "Ask Proton about it" }));
+    expect(router.push).toHaveBeenLastCalledWith({
+      pathname: "/proton",
+      params: { about: "project", id: "7", area: "design", section: "financials" },
+    });
+  });
+
   it("shows nothing to employees", async () => {
     await renderWithProviders(<AdminProjectActions project={aProject()} />, {
       persona: "designEmployee",
