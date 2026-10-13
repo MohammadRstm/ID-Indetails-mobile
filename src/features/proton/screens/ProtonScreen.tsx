@@ -13,6 +13,7 @@ import { Bubble } from "../components/Bubble";
 import { ChatNote } from "../components/ChatNote";
 import { LiveReply } from "../components/LiveReply";
 import { ProtonComposer, type ReplyChip } from "../components/ProtonComposer";
+import { ProtonMark } from "../components/ProtonMark";
 import { ProtonWelcome } from "../components/ProtonWelcome";
 import { greetingFor, startersFor } from "../greeting";
 import { pageContextOf } from "../pageContext";
@@ -91,6 +92,9 @@ export function ProtonScreen() {
         <ScreenHeader
           title="Proton"
           subtitle="AI assistant"
+          leading={
+            <ProtonMark turns={turns} actions={chat.actions} live={live} blocked={blocked} />
+          }
           onBack={router.canGoBack() ? () => router.back() : undefined}
           actions={
             turns.length > 0 ? (
