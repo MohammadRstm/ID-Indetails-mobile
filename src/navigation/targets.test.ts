@@ -227,6 +227,12 @@ describe("routeForProtonCommand", () => {
     page: null,
     section: null,
     tab: null,
+    companyTab: null,
+    fill: null,
+    settingsSection: null,
+    sounds: null,
+    surface: null,
+    theme: null,
     ...c,
   });
 
@@ -283,6 +289,16 @@ describe("routeForProtonCommand", () => {
     const sa = perms("superAdmin");
     expect(routeForProtonCommand(command({ page: "reports", domain: "design" }), sa)).toBeNull();
     expect(routeForProtonCommand(command({ page: "company_expenses" }), sa)).toBeNull();
+  });
+
+  it("leaves the pages and commands added later unopened until the phone maps them", () => {
+    const sa = perms("superAdmin");
+    for (const page of ["my_work", "my_pay", "settings", "messages", "launcher"] as const) {
+      expect(routeForProtonCommand(command({ page, domain: null }), sa)).toBeNull();
+    }
+    for (const type of ["open_surface", "fill_form", "set_preference"] as const) {
+      expect(routeForProtonCommand(command({ type }), sa)).toBeNull();
+    }
   });
 
   it("keeps the company's figures to super admins", () => {

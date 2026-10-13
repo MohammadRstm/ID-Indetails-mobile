@@ -7,16 +7,16 @@ import type { Schemas } from "@/api/types";
  */
 
 export type ProtonPageContext = Schemas["ProtonPageContext"];
-type RefType = Schemas["ProtonRefType"];
+
+const AREAS = ["design", "execution"] as const;
+const TYPES = ["project", "client", "person"] as const;
+type RefType = (typeof TYPES)[number];
 
 const PAGE_OF: Record<RefType, NonNullable<Schemas["ProtonPage"]>> = {
   project: "projects",
   client: "clients",
   person: "people",
 };
-
-const AREAS = ["design", "execution"] as const;
-const TYPES = ["project", "client", "person"] as const;
 
 /** Proton, asked about one record. */
 export function protonHrefFor(type: RefType, id: number, domain: string | null): Href {
@@ -36,5 +36,12 @@ export function pageContextOf(
   const idText = first(params.id);
   const id = idText && /^\d{1,15}$/.test(idText) ? Number(idText) : null;
   if (!area || !type || !id) return null;
-  return { area, page: PAGE_OF[type], entityType: type, entityId: id, section: null };
+  return {
+    area,
+    page: PAGE_OF[type],
+    entityType: type,
+    entityId: id,
+    section: null,
+    surface: null,
+  };
 }
