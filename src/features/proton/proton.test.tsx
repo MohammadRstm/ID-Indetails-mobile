@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
+import Storage from "expo-sqlite/kv-store";
 import { http, HttpResponse } from "msw";
 import type { ProtonUiCommand, Schemas } from "@/api/types";
 import { takeLogWorkRequest } from "@/features/work/logWorkRequest";
@@ -18,7 +19,11 @@ jest.mock("expo-router", () => ({
 const mockStream = jest.fn();
 jest.mock("expo/fetch", () => ({ fetch: (...args: unknown[]) => mockStream(...args) }));
 
-beforeEach(() => mockStream.mockRejectedValue(new TypeError("Network request failed")));
+// Proton reopens on the chat that was open last: each test starts without one.
+beforeEach(async () => {
+  await Storage.clear();
+  mockStream.mockRejectedValue(new TypeError("Network request failed"));
+});
 afterEach(() => jest.clearAllMocks());
 
 const usage: Schemas["ProtonUsageResponse"] = {

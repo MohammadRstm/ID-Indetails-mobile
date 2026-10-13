@@ -1,8 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toApiError } from "@/api/errors";
+import { useCurrentUser } from "@/auth/session";
 import {
-  useEndConversation,
+  fetchSavedChat,
+  refreshChats,
   usageKey,
   type AskBody,
   type ProtonChoice,
@@ -11,7 +13,10 @@ import {
 import { cardsOf } from "./cards";
 import type { ActionState, ProtonTurn } from "./chat";
 import { protonErrorText } from "./errorWords";
+import { parseBlocks } from "./figures";
+import { readOpenChat, saveOpenChat } from "./openChat";
 import type { ProtonPageContext } from "./pageContext";
+import { chatOf } from "./savedChat";
 import { addDelta, type LiveText } from "./sse";
 import { askProton } from "./stream";
 import { useCarryOut } from "./useCarryOut";
@@ -24,23 +29,74 @@ export type LiveAnswer = { status: string | null; text: LiveText | null };
 
 type Question = Omit<AskBody, "conversationId" | "page">;
 
+type ChatState = {
+  conversationId: string | null;
+  turns: ProtonTurn[];
+  actions: Record<string, ActionState>;
+  /** Why the chat can only be read, not carried on; null when it can be. */
+  locked: string | null;
+};
+
+const EMPTY: ChatState = { conversationId: null, turns: [], actions: {}, locked: null };
+
 /**
  * Proton's chat: asking (live, with Stop), the turns and the proposals' states. A change a reply proposes happens
- * only when the person presses Confirm on its card. The chat lives as long as the screen does.
+ * only when the person presses Confirm on its card. The chat is saved by the API as it goes; this phone keeps only
+ * which saved chat was open, and shows it again the next time Proton opens. "New conversation" leaves the chat
+ * without deleting it; deleting is its own, explicit action.
  */
 export function useProtonChat(page: ProtonPageContext | null) {
   const queryClient = useQueryClient();
   const carryOut = useCarryOut();
-  const end = useEndConversation();
-  const [conversationId, setConversationId] = useState<string | null>(null);
-  const [turns, setTurns] = useState<ProtonTurn[]>([]);
-  const [actions, setActions] = useState<Record<string, ActionState>>({});
+  const userId = useCurrentUser().id;
+  const [chat, setChat] = useState<ChatState>(EMPTY);
   const [live, setLive] = useState<LiveAnswer | null>(null);
+  // A saved chat is being brought back: it is read from the API, and nothing can be asked until it is here.
+  const [opening, setOpening] = useState(() => readOpenChat(userId) != null);
   const running = useRef<AbortController | null>(null);
+  // Which opening is the latest; an earlier one that arrives late is ignored.
+  const latestOpening = useRef(0);
 
   useEffect(() => () => running.current?.abort(), []);
 
-  const add = (...more: ProtonTurn[]) => setTurns((t) => [...t, ...more]);
+  const add = (...more: ProtonTurn[]) => setChat((c) => ({ ...c, turns: [...c.turns, ...more] }));
+
+  const cancelRunning = useCallback(() => {
+    const controller = running.current;
+    running.current = null;
+    controller?.abort();
+    setLive(null);
+  }, []);
+
+  /** Shows a saved chat. Gives the reason when it can't be opened, or null. */
+  const open = useCallback(
+    async (id: string): Promise<string | null> => {
+      const mine = ++latestOpening.current;
+      cancelRunning();
+      setOpening(true);
+      try {
+        const saved = await fetchSavedChat(id);
+        if (mine !== latestOpening.current) return null;
+        setChat(chatOf(saved));
+        saveOpenChat(userId, saved.id);
+        return null;
+      } catch (error) {
+        if (mine !== latestOpening.current) return null;
+        const failure = toApiError(error);
+        // A chat that is gone (deleted, or past its 90 days) is no longer the one to bring back.
+        if (failure.status === 404 && readOpenChat(userId) === id) saveOpenChat(userId, null);
+        return protonErrorText(failure);
+      } finally {
+        if (mine === latestOpening.current) setOpening(false);
+      }
+    },
+    [cancelRunning, userId],
+  );
+
+  useEffect(() => {
+    const id = readOpenChat(userId);
+    if (id) void open(id);
+  }, [open, userId]);
 
   async function send(question: Question, id: string | null, retried = false): Promise<void> {
     const controller = new AbortController();
@@ -58,7 +114,9 @@ export function useProtonChat(page: ProtonPageContext | null) {
       );
       queryClient.setQueryData(usageKey, reply.usage);
       const did = carryOut(reply.uiCommands);
-      setConversationId(reply.conversationId);
+      setChat((c) => ({ ...c, conversationId: reply.conversationId }));
+      saveOpenChat(userId, reply.conversationId);
+      void refreshChats(queryClient);
       if (reply.rolledOver) add({ from: "note", text: ROLLED_OVER });
       add({
         from: "proton",
@@ -70,9 +128,10 @@ export function useProtonChat(page: ProtonPageContext | null) {
         quickReplies: reply.quickReplies,
         suggestions: reply.suggestions,
         did,
+        blocks: parseBlocks(reply.blocks),
       });
     } catch (error) {
-      // Stop (or a new chat, which clears `running`) ends the answer: nothing of it is kept.
+      // Stop (or leaving the chat, which clears `running`) ends the answer: nothing of it is kept.
       if (controller.signal.aborted) {
         if (running.current === controller) add({ from: "note", text: STOPPED });
         return;
@@ -80,7 +139,8 @@ export function useProtonChat(page: ProtonPageContext | null) {
       const failure = toApiError(error);
       if (failure.code === "proton_conversation_ended" && id != null) {
         // The server no longer has the chat: a typed question is asked again in a new one, a button is not.
-        setConversationId(null);
+        setChat((c) => ({ ...c, conversationId: null }));
+        saveOpenChat(userId, null);
         if (question.text && !retried) {
           add({ from: "note", text: failure.message });
           await send({ text: question.text }, null, true);
@@ -99,17 +159,20 @@ export function useProtonChat(page: ProtonPageContext | null) {
   }
 
   function submit(shown: string, question: Question) {
-    if (running.current) return;
+    if (running.current || opening || chat.locked) return;
     add({ from: "you", text: shown });
-    void send(question, conversationId);
+    void send(question, chat.conversationId);
   }
 
   return {
-    turns,
-    conversationId,
+    turns: chat.turns,
+    conversationId: chat.conversationId,
+    locked: chat.locked,
+    opening,
     live,
-    actions,
-    setAction: (id: string, state: ActionState) => setActions((a) => ({ ...a, [id]: state })),
+    actions: chat.actions,
+    setAction: (id: string, state: ActionState) =>
+      setChat((c) => ({ ...c, actions: { ...c.actions, [id]: state } })),
     ask: (text: string) => submit(text, { text }),
     // A button sends only what it is; the API checks it was offered and writes the question itself.
     pick: (choice: ProtonChoice) =>
@@ -117,15 +180,14 @@ export function useProtonChat(page: ProtonPageContext | null) {
     quickReply: (option: ProtonQuickReplyOption) => submit(option.label, { reply: option.reply }),
     suggest: (suggestion: string, index: number) => submit(suggestion, { suggestion: index }),
     stop: () => running.current?.abort(),
+    open,
+    /** Leaves this chat for a fresh one. The chat stays saved; deleting it is a separate action. */
     startOver: () => {
-      const controller = running.current;
-      running.current = null;
-      controller?.abort();
-      setLive(null);
-      if (conversationId) end.mutate(conversationId);
-      setConversationId(null);
-      setTurns([]);
-      setActions({});
+      latestOpening.current++;
+      cancelRunning();
+      setOpening(false);
+      saveOpenChat(userId, null);
+      setChat(EMPTY);
     },
   };
 }
