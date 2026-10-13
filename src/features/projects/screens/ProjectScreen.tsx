@@ -15,7 +15,6 @@ import { P } from "@/permissions/codes";
 import { usePermissions } from "@/permissions/usePermissions";
 import {
   Badge,
-  Bar,
   Button,
   Card,
   ListRow,
@@ -24,22 +23,32 @@ import {
   ScreenHeader,
   Section,
   Skeleton,
-  StatusBadge,
   Text,
 } from "@/ui";
 import { useProject } from "../api";
+import { ProjectHead } from "../components/ProjectHead";
+import { ProjectOverview } from "../components/ProjectOverview";
+import { SectionAnchor } from "../components/SectionAnchor";
+import {
+  projectSections,
+  sectionToShow,
+  type PhoneSectionKey,
+  type ProjectSectionKey,
+} from "../model";
 import { AdminProjectActions } from "../slots/AdminProjectActions";
 import { ProjectMoney } from "../slots/ProjectMoney";
+import { useSectionScroll } from "../useSectionScroll";
+import { ContributorsSection } from "./ContributorsSection";
 
 export type ProjectScreenProps = {
   projectId: number;
-  /** Opened on this section (a push or link about a meeting). */
-  section: "meetings" | null;
+  /** Opened scrolled to this section (a push or link); one the person can't see, or the web keeps, is ignored. */
+  section: ProjectSectionKey | null;
 };
 
 const back = () => (router.canGoBack() ? router.back() : router.replace("/today"));
 
-/** A project: its summary, requirements and meetings, and on a site its materials and labour. */
+/** A project: its head, then the sections its viewer may see (money, overview, who worked, requirements, meetings). */
 export function ProjectScreen({ projectId, section }: ProjectScreenProps) {
   const project = useProject(projectId);
   const banner = useOfflineBanner(project.dataUpdatedAt);
@@ -67,7 +76,31 @@ export function ProjectScreen({ projectId, section }: ProjectScreenProps) {
     );
   }
 
-  const p = project.data;
+  return (
+    <ProjectView
+      project={project.data}
+      requested={section}
+      banner={banner}
+      refreshing={project.isRefetching}
+      onRefresh={() => void project.refetch()}
+    />
+  );
+}
+
+type ProjectViewProps = {
+  project: Project;
+  requested: ProjectSectionKey | null;
+  banner: ReactNode;
+  refreshing: boolean;
+  onRefresh: () => void;
+};
+
+function ProjectView({ project: p, requested, banner, refreshing, onRefresh }: ProjectViewProps) {
+  const perms = usePermissions();
+  const open = p.status === "active" || p.status === "hold";
+  const sections = projectSections({ domain: p.domain, hasMoney: p.money != null, has: perms.has });
+  const scroll = useSectionScroll(sectionToShow(requested, sections));
+
   return (
     <Screen
       header={
@@ -79,69 +112,74 @@ export function ProjectScreen({ projectId, section }: ProjectScreenProps) {
         />
       }
       banner={banner}
-      refreshing={project.isRefetching}
-      onRefresh={() => void project.refetch()}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      scrollRef={scroll.scrollRef}
+      onScrollBeginDrag={scroll.onScrollBeginDrag}
     >
-      <ProjectSections project={p} meetingsFirst={section === "meetings"} />
+      <ProjectHead
+        status={p.status}
+        progressPct={p.progressPct}
+        facts={[
+          `Owner ${p.owner.name}`,
+          `Started ${fmtDate(p.startDate)}`,
+          p.targetDate ? `Target ${fmtDate(p.targetDate)}` : null,
+          p.location,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
+        description={p.description}
+      />
+      {sections.map((section) => (
+        <SectionAnchor key={section} onPosition={(y) => scroll.onAnchor(section, y)}>
+          <ProjectSection section={section} project={p} open={open} />
+        </SectionAnchor>
+      ))}
     </Screen>
   );
 }
 
-function ProjectSections({
+function ProjectSection({
+  section,
   project: p,
-  meetingsFirst,
+  open,
 }: {
+  section: PhoneSectionKey;
   project: Project;
-  meetingsFirst: boolean;
+  open: boolean;
 }) {
   const perms = usePermissions();
-  const open = p.status === "active" || p.status === "hold";
   const site = p.domain === "execution";
-  const requirements = <RequirementsSection project={p} />;
-  const meetings = <MeetingsSection project={p} open={open} />;
 
-  return (
-    <>
-      <Section>
-        <Card>
-          <StatusBadge status={p.status} />
-          <Text variant="small" tone="secondary">
-            {p.progressPct}% done
-          </Text>
-          <Bar value={p.progressPct / 100} accessibilityLabel="Progress" />
-          <Text variant="small" tone="muted">
-            {[
-              `Owner ${p.owner.name}`,
-              `Started ${fmtDate(p.startDate)}`,
-              p.targetDate ? `Target ${fmtDate(p.targetDate)}` : null,
-              p.location,
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </Text>
-          {p.description ? <Text>{p.description}</Text> : null}
-        </Card>
-      </Section>
-      <ProjectMoney project={p} />
-      {!site && open && perms.hasAll(P.WORK_ENTRY_CREATE, P.WORK_ENTRY_VIEW_OWN) ? (
-        <Section>
-          <Button
-            label="Log work on this project"
-            icon="plus"
-            variant="primary"
-            fullWidth
-            onPress={() => {
-              requestLogWork({ projectId: p.id });
-              router.push("/log-work");
-            }}
+  switch (section) {
+    case "financials":
+      return <ProjectMoney project={p} />;
+    case "overview": {
+      const canLogWork = !site && open && perms.hasAll(P.WORK_ENTRY_CREATE, P.WORK_ENTRY_VIEW_OWN);
+      return (
+        <>
+          <ProjectOverview
+            progressPct={p.progressPct}
+            onLogWork={
+              canLogWork
+                ? () => {
+                    requestLogWork({ projectId: p.id });
+                    router.push("/log-work");
+                  }
+                : undefined
+            }
           />
-        </Section>
-      ) : null}
-      {site ? <SiteSection project={p} open={open} /> : null}
-      {meetingsFirst ? meetings : requirements}
-      {meetingsFirst ? requirements : meetings}
-    </>
-  );
+          {site ? <SiteSection project={p} open={open} /> : null}
+        </>
+      );
+    }
+    case "contributors":
+      return <ContributorsSection projectId={p.id} />;
+    case "requirements":
+      return <RequirementsSection project={p} />;
+    case "meetings":
+      return <MeetingsSection project={p} open={open} />;
+  }
 }
 
 function SiteSection({ project: p, open }: { project: Project; open: boolean }) {

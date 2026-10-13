@@ -4,7 +4,8 @@ import { ProjectRequirementsScreen } from "@/features/requirements/screens/Proje
 import { api } from "@test/handlers";
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
-import { project, requirement } from "../testing";
+import type { Project } from "@/api/types";
+import { contributor, project, projectWork, requirement } from "../testing";
 import { ProjectScreen } from "./ProjectScreen";
 
 jest.mock("expo-router", () => ({
@@ -59,6 +60,103 @@ describe("the project screen", () => {
     });
     await screen.findByText("Villa Haddad");
     expect(screen.queryByText(/\$/)).toBeNull();
+  });
+});
+
+// Only the parts the Money section reads.
+const money = {
+  currency: "USD",
+  revenue: 9000,
+  profit: 2500,
+  margin: 0.28,
+  cost: { total: 6500 },
+  billing: { received: 4000, outstanding: 5000, overdue: 0, overdueCount: 0 },
+} as unknown as NonNullable<Project["money"]>;
+
+const SECTION_TITLES = ["Money", "Overview", "Who worked", "Requirements", "Meetings"];
+
+/** The sections on screen, top to bottom. */
+function shownSections() {
+  return screen
+    .getAllByRole("header")
+    .map((node) => node.props.children as string)
+    .filter((title) => SECTION_TITLES.includes(title));
+}
+
+describe("the project screen ordered by permission", () => {
+  let workAsked = false;
+
+  function serveWork(p: Project) {
+    workAsked = false;
+    serve(p);
+    server.use(
+      http.get(api(`/projects/${p.id}/work`), () => {
+        workAsked = true;
+        return HttpResponse.json(
+          projectWork(p.id, [
+            contributor(4, "Sarah Test", 150, { entries: 4 }),
+            contributor(9, "Omar Test", 90),
+          ]),
+        );
+      }),
+    );
+  }
+
+  it("gives a super admin money first, then who worked, requirements and meetings", async () => {
+    serveWork(project(8, "design", { money }));
+    await renderWithProviders(<ProjectScreen projectId={8} section={null} />, {
+      persona: "superAdmin",
+    });
+    expect(await screen.findByText("Omar Test")).toBeTruthy();
+    expect(shownSections()).toEqual(["Money", "Who worked", "Requirements", "Meetings"]);
+    expect(screen.getByText("2h 30m")).toBeTruthy();
+  });
+
+  it("gives a Design admin who worked without any money", async () => {
+    serveWork(project(8, "design", { money }));
+    await renderWithProviders(<ProjectScreen projectId={8} section={null} />, {
+      persona: "designAdmin",
+    });
+    expect(await screen.findByText("Omar Test")).toBeTruthy();
+    expect(shownSections()).toEqual(["Who worked", "Requirements", "Meetings"]);
+  });
+
+  it("gives a Design employee their overview and never asks for everyone's work", async () => {
+    serveWork(project(8, "design"));
+    await renderWithProviders(<ProjectScreen projectId={8} section={null} />, {
+      persona: "designEmployee",
+    });
+    await screen.findByText("Villa Haddad");
+    expect(shownSections()).toEqual(["Overview", "Requirements", "Meetings"]);
+    expect(workAsked).toBe(false);
+  });
+
+  it("gives an Execution admin no who-worked section", async () => {
+    serveWork(project(7, "execution"));
+    await renderWithProviders(<ProjectScreen projectId={7} section={null} />, {
+      persona: "executionAdmin",
+    });
+    await screen.findByText("Faqra chalet");
+    expect(shownSections()).toEqual(["Overview", "Requirements", "Meetings"]);
+    expect(workAsked).toBe(false);
+  });
+
+  it("opens on a section by link without hiding any other", async () => {
+    serveWork(project(8, "design"));
+    await renderWithProviders(<ProjectScreen projectId={8} section="meetings" />, {
+      persona: "designEmployee",
+    });
+    await screen.findByText("Villa Haddad");
+    expect(shownSections()).toEqual(["Overview", "Requirements", "Meetings"]);
+  });
+
+  it("ignores a link to a section the person can't see", async () => {
+    serveWork(project(8, "design"));
+    await renderWithProviders(<ProjectScreen projectId={8} section="financials" />, {
+      persona: "designEmployee",
+    });
+    await screen.findByText("Villa Haddad");
+    expect(shownSections()).toEqual(["Overview", "Requirements", "Meetings"]);
   });
 });
 
