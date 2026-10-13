@@ -1,6 +1,7 @@
 import { router, type Href } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { useCurrentUser } from "@/auth/session";
+import { protonPageHref } from "@/features/proton/pageContext";
 import { companyToday, fmtDayDate, fmtTime } from "@/format/time";
 import { routeForTarget } from "@/navigation/targets";
 import { P } from "@/permissions/codes";
@@ -75,7 +76,7 @@ export function AdminTodayScreen() {
               <IconButton
                 icon="compass"
                 accessibilityLabel="Ask Proton"
-                onPress={() => router.push("/proton")}
+                onPress={() => router.push(protonPageHref("dashboard", domain))}
               />
             ) : undefined
           }
