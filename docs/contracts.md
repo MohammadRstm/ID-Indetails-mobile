@@ -230,7 +230,7 @@ Phase 1a creates each slot as a component that renders nothing, with its final p
 | Slot (`src/features/…`) | Props | Rendered by (where) | Owner |
 |---|---|---|---|
 | `projects/slots/AdminProjectActions.tsx` | `{ project }` | 2, project screen header | 3 |
-| `projects/slots/ProjectMoney.tsx` | `{ project }` | 2, project screen below the summary | 4 |
+| `projects/slots/ProjectMoney.tsx` | `{ project }` | 2, project screen, first section under the head | 4 |
 | `requirements/slots/RequirementManageActions.tsx` | `{ projectId, requirement }` | 2, each requirement row's menu | 3 |
 | `requirements/slots/AddRequirementButton.tsx` | `{ projectId }` | 2, project requirements header | 3 |
 | `people/slots/PersonSecurityActions.tsx` | `{ person }` | 3, person screen | 4 |

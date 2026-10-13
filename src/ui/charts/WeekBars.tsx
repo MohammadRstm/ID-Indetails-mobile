@@ -5,7 +5,7 @@ import { fmtDurShort } from "@/format/time";
 import { useTheme } from "@/theme/ThemeProvider";
 import { spacing } from "@/theme/tokens";
 import { Text } from "../Text";
-import { barPath } from "./core";
+import { barPath, chartDescription } from "./core";
 
 export type WeekDay = {
   /** "yyyy-MM-dd", reported back when the day is pressed. */
@@ -21,6 +21,10 @@ export type WeekDay = {
 
 type WeekBarsProps = {
   days: WeekDay[];
+  /** What the chart shows, for screen readers: "Hours this week". */
+  accessibilityLabel: string;
+  /** A short sentence about its data, for screen readers, worded by the caller who holds the data. */
+  summary: string;
   /** The day shown as selected. */
   selectedKey?: string;
   onSelectDay?: (key: string) => void;
@@ -28,7 +32,14 @@ type WeekBarsProps = {
 };
 
 /** A week of logged hours: a rounded column per day, the day's requirement as a dashed line. */
-export function WeekBars({ days, selectedKey, onSelectDay, height = 132 }: WeekBarsProps) {
+export function WeekBars({
+  days,
+  accessibilityLabel,
+  summary,
+  selectedKey,
+  onSelectDay,
+  height = 132,
+}: WeekBarsProps) {
   const { colors } = useTheme();
   const [width, setWidth] = useState(0);
   const top = 18;
@@ -39,47 +50,50 @@ export function WeekBars({ days, selectedKey, onSelectDay, height = 132 }: WeekB
   const y = (minutes: number) => top + plot - (minutes / max) * plot;
 
   return (
-    <View
-      onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
-      accessibilityRole="summary"
-      accessibilityLabel={days.map((d) => `${d.label} ${fmtDurShort(d.minutes)}`).join(", ")}
-    >
-      {width > 0 && (
-        <Svg width={width} height={height}>
-          <Line
-            x1={0}
-            x2={width}
-            y1={height - 0.5}
-            y2={height - 0.5}
-            stroke={colors.axis}
-            strokeWidth={1}
-          />
-          {days.map((d, i) => {
-            const x = i * slot + (slot - barW) / 2;
-            const selected = d.key === selectedKey || (!selectedKey && d.today);
-            return (
-              <G key={d.key}>
-                <Path
-                  d={barPath(x, y(d.minutes), barW, plot + top - y(d.minutes), 4)}
-                  fill={selected ? colors.accent : colors.chart}
-                  opacity={selected ? 1 : 0.55}
-                />
-                {d.targetMinutes ? (
-                  <Line
-                    x1={x - 4}
-                    x2={x + barW + 4}
-                    y1={y(d.targetMinutes)}
-                    y2={y(d.targetMinutes)}
-                    stroke={colors.ink3}
-                    strokeWidth={1}
-                    strokeDasharray="3 3"
+    <View onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}>
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={chartDescription(accessibilityLabel, summary)}
+        style={{ height }}
+      >
+        {width > 0 && (
+          <Svg width={width} height={height}>
+            <Line
+              x1={0}
+              x2={width}
+              y1={height - 0.5}
+              y2={height - 0.5}
+              stroke={colors.axis}
+              strokeWidth={1}
+            />
+            {days.map((d, i) => {
+              const x = i * slot + (slot - barW) / 2;
+              const selected = d.key === selectedKey || (!selectedKey && d.today);
+              return (
+                <G key={d.key}>
+                  <Path
+                    d={barPath(x, y(d.minutes), barW, plot + top - y(d.minutes), 4)}
+                    fill={selected ? colors.accent : colors.chart}
+                    opacity={selected ? 1 : 0.55}
                   />
-                ) : null}
-              </G>
-            );
-          })}
-        </Svg>
-      )}
+                  {d.targetMinutes ? (
+                    <Line
+                      x1={x - 4}
+                      x2={x + barW + 4}
+                      y1={y(d.targetMinutes)}
+                      y2={y(d.targetMinutes)}
+                      stroke={colors.ink3}
+                      strokeWidth={1}
+                      strokeDasharray="3 3"
+                    />
+                  ) : null}
+                </G>
+              );
+            })}
+          </Svg>
+        )}
+      </View>
       <View style={styles.labels}>
         {days.map((d) => {
           const selected = d.key === selectedKey || (!selectedKey && d.today);

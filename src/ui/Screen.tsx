@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -15,6 +15,10 @@ type ScreenProps = {
   /** Pull to refresh, for scrolling screens. */
   refreshing?: boolean;
   onRefresh?: () => void;
+  /** The scrolling content's handle, for a screen that jumps to a part of itself. */
+  scrollRef?: Ref<ScrollView>;
+  /** The person started scrolling by hand. */
+  onScrollBeginDrag?: () => void;
   /** The content's side and top padding (default on). */
   padded?: boolean;
   /** Which edges keep clear of the notch and home indicator. Tab screens leave the bottom to the tab bar. */
@@ -29,12 +33,16 @@ export function Screen({
   scroll = true,
   refreshing = false,
   onRefresh,
+  scrollRef,
+  onScrollBeginDrag,
   padded = true,
   edges = ["top", "left", "right"],
 }: ScreenProps) {
   const { colors } = useTheme();
   const content = scroll ? (
     <ScrollView
+      ref={scrollRef}
+      onScrollBeginDrag={onScrollBeginDrag}
       style={styles.fill}
       contentContainerStyle={[padded && styles.padded, styles.scrollContent]}
       keyboardShouldPersistTaps="handled"

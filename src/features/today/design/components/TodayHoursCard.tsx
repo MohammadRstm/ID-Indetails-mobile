@@ -27,7 +27,12 @@ export function TodayHoursCard(props: TodayHoursCardProps) {
           value={dayShare}
           tone={dayShare >= 1 ? "ok" : "accent"}
           size={84}
-          accessibilityLabel={`${fmtDur(props.loggedMinutes)} logged today`}
+          accessibilityLabel="Hours logged today"
+          summary={
+            props.isWorkingDay
+              ? `${fmtDur(props.loggedMinutes)} of ${fmtDur(props.requiredMinutes)}`
+              : `Day off, ${fmtDur(props.loggedMinutes)} logged`
+          }
         >
           <Text variant="mono">{fmtH(props.loggedMinutes)}</Text>
         </ProgressRing>
@@ -48,7 +53,16 @@ export function TodayHoursCard(props: TodayHoursCardProps) {
           </Text>
         </View>
       </View>
-      <DayRuler blocks={props.blocks} now={props.now} />
+      <DayRuler
+        accessibilityLabel="Where today's hours sit in the day"
+        summary={
+          props.blocks.length === 0
+            ? "Nothing logged yet."
+            : `${props.blocks.length} ${props.blocks.length === 1 ? "entry" : "entries"} logged.`
+        }
+        blocks={props.blocks}
+        now={props.now}
+      />
       <View style={styles.week}>
         <View style={styles.weekText}>
           <Text variant="micro">This week</Text>

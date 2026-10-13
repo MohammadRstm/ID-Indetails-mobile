@@ -26,6 +26,9 @@ const FILTERS: { value: InvoiceFilter; label: string }[] = [
   { value: "draft", label: "Drafts" },
 ];
 
+/** The words a link's `filter` parameter may use. */
+export const INVOICE_FILTER_VALUES = FILTERS.map((f) => f.value);
+
 const EMPTY: Record<InvoiceFilter, string> = {
   all: "No invoices yet. They are drafted on the web.",
   overdue: "Nothing is overdue.",
@@ -33,11 +36,16 @@ const EMPTY: Record<InvoiceFilter, string> = {
   draft: "No drafts are waiting.",
 };
 
+export type InvoicesScreenProps = {
+  /** The filter to start on (a link to the overdue invoices); everything when null. */
+  initialFilter?: InvoiceFilter | null;
+};
+
 /** Every invoice the person can see, newest first, narrowed to overdue, sent or drafts. */
-export function InvoicesScreen() {
+export function InvoicesScreen({ initialFilter = null }: InvoicesScreenProps) {
   const perms = usePermissions();
   const { colors } = useTheme();
-  const [filter, setFilter] = useState<InvoiceFilter>("all");
+  const [filter, setFilter] = useState<InvoiceFilter>(initialFilter ?? "all");
   const query = useInvoiceList(filter);
   const invoices = query.data?.pages.flatMap((page) => page.items) ?? [];
   const error = query.isError ? toApiError(query.error) : null;

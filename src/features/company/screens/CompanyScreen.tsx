@@ -20,7 +20,7 @@ import { Figure, FigureGrid } from "../../billing/components/MoneyBits";
 import { useCompanyMonthly, useCompanyOverview } from "../api";
 import { DomainCard } from "../components/DomainCard";
 import { MonthlyChart } from "../components/MonthlyChart";
-import { DOMAIN_LABEL, PERIOD_OPTIONS, type CompanyPeriod } from "../model";
+import { DOMAIN_LABEL, monthlySummary, PERIOD_OPTIONS, type CompanyPeriod } from "../model";
 
 const CHART_MONTHS = 12;
 
@@ -123,6 +123,8 @@ export function CompanyScreen() {
                 revenue: m.revenue,
                 netProfit: m.netProfit,
               }))}
+              accessibilityLabel="Revenue and net profit by month"
+              summary={monthlySummary(monthly.data)}
             />
           ) : monthly.isError ? (
             <InlineError
