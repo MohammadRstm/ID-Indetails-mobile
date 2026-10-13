@@ -18,3 +18,8 @@ export function niceMax(v: number): number {
 }
 
 export const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/** What a screen reader says about a chart: what it shows, then a short summary of its data (as the web's charts do). */
+export function chartDescription(label: string, summary: string): string {
+  return `${label}. ${summary}`;
+}

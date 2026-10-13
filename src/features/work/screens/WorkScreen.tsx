@@ -39,7 +39,7 @@ import {
 import { EntryRow } from "../components/EntryRow";
 import { StatTiles } from "../components/StatTiles";
 import { requestLogWork } from "../logWorkRequest";
-import { groupByDay, LEDGER_STATUS, weekColumns } from "../model";
+import { groupByDay, LEDGER_STATUS, weekColumns, weekSummary } from "../model";
 
 type View = "week" | "overtime" | "balance";
 
@@ -128,7 +128,13 @@ function WeekView() {
       </Section>
       <Section title="This week">
         <Card>
-          <WeekBars days={columns} selectedKey={selected} onSelectDay={setSelected} />
+          <WeekBars
+            days={columns}
+            accessibilityLabel="Hours this week"
+            summary={weekSummary(columns, s.thisWeekMinutes)}
+            selectedKey={selected}
+            onSelectDay={setSelected}
+          />
         </Card>
       </Section>
       <Section

@@ -9,6 +9,7 @@ import {
   groupByDay,
   isoAt,
   overtimeTag,
+  weekSummary,
   workErrorText,
 } from "./model";
 
@@ -126,4 +127,21 @@ it("groups entries by the company day they start on", () => {
   ]);
   // 22:00 UTC on the 7th is 1 AM on the 8th in Beirut.
   expect(groups.map((g) => [g.day, g.entries.length])).toEqual([["2026-10-08", 3]]);
+});
+
+describe("the week's chart summary", () => {
+  const day = (key: string, label: string, minutes: number) => ({ key, label, minutes });
+
+  it("names the busiest day and the week's total", () => {
+    const columns = [
+      day("2026-10-05", "Mon", 480),
+      day("2026-10-06", "Tue", 525),
+      day("2026-10-07", "Wed", 0),
+    ];
+    expect(weekSummary(columns, 1005)).toBe("16h 45m this week, the most on Tuesday (8h 45m).");
+  });
+
+  it("says so when nothing is logged", () => {
+    expect(weekSummary([day("2026-10-05", "Mon", 0)], 0)).toBe("Nothing logged this week.");
+  });
 });

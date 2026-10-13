@@ -3,6 +3,7 @@ import { StyleSheet, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { useTheme } from "@/theme/ThemeProvider";
 import type { ColorName } from "@/theme/tokens";
+import { chartDescription } from "./core";
 
 type ProgressRingProps = {
   /** How far round, from 0 to 1 (as given; drawn clamped). */
@@ -12,7 +13,10 @@ type ProgressRingProps = {
   tone?: "accent" | "ok" | "warn" | "now";
   /** In the middle, such as today's hours. */
   children?: ReactNode;
-  accessibilityLabel?: string;
+  /** What the ring shows, for screen readers: "Hours logged today". */
+  accessibilityLabel: string;
+  /** A short sentence about its data, for screen readers, worded by the caller who holds the data. */
+  summary: string;
 };
 
 const TONE: Record<NonNullable<ProgressRingProps["tone"]>, ColorName> = {
@@ -30,6 +34,7 @@ export function ProgressRing({
   tone = "accent",
   children,
   accessibilityLabel,
+  summary,
 }: ProgressRingProps) {
   const { colors } = useTheme();
   const fill = Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
@@ -40,7 +45,7 @@ export function ProgressRing({
     <View
       style={{ width: size, height: size }}
       accessibilityRole="progressbar"
-      accessibilityLabel={accessibilityLabel}
+      accessibilityLabel={chartDescription(accessibilityLabel, summary)}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(fill * 100) }}
     >
       <Svg width={size} height={size}>

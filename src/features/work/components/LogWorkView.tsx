@@ -84,7 +84,17 @@ export function LogWorkView(props: LogWorkViewProps) {
             <TimeField label="End" value={props.endMin} onChange={props.onEndChange} />
           </View>
         </View>
-        <DayRuler blocks={[props.block]} others={props.others} now={props.now} />
+        <DayRuler
+          accessibilityLabel="Where this entry sits in the day"
+          summary={`${fmtDayDate(props.date)}, ${fmtDur(props.duration)}${
+            props.others.length > 0
+              ? `, with ${props.others.length} other ${props.others.length === 1 ? "entry" : "entries"} that day`
+              : ""
+          }.`}
+          blocks={[props.block]}
+          others={props.others}
+          now={props.now}
+        />
         <Text variant="small" tone="secondary">
           {fmtDayDate(props.date)} · <Text variant="mono">{fmtDur(props.duration)}</Text>
           {props.endsNextDay ? " (ends the next day)" : ""}
