@@ -7,6 +7,8 @@ import type { Chat } from "./api";
 
 export const MAX_ATTACHMENTS = 10;
 export const MAX_MESSAGE = 4000;
+/** Read out with the "with Proton" mark: touch has no tooltip, as on the web. */
+export const VIA_PROTON_LABEL = "Written with Proton and sent after the sender confirmed it";
 /** Above this, a video on mobile data gets a warning first. */
 export const LARGE_VIDEO_BYTES = 20 * 1024 * 1024;
 
