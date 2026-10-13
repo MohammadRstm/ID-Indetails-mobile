@@ -167,7 +167,7 @@ Order: 6A → 6B → 6C → 6D → 6E, then 6F if approved. 6A comes first becau
 
 The website session's client portal Phase 1 is open as MohammadRstm/ID-Indetails-api#108 and MohammadRstm/ID-Indetails-client#116 (`docs/client-portal.md` on the API branch `MR-Client-Portal-Accounts`). When those merge, the phone needs:
 
-- **Permission code:** `client_access:manage` (Design only, admins and super admins by default) added to `src/permissions/codes.ts` and its count test (55 codes).
+- **Permission codes:** `client_access:manage` (Phase 1) and `client_portal:manage` (Phase 2, MohammadRstm/ID-Indetails-api#109 and MohammadRstm/ID-Indetails-client#117), both Design only and held by admins and super admins by default, added to `src/permissions/codes.ts` and its count test (56 codes).
 - **Activity wording:** words for the 6 new activity kinds in the phone's activity feed, which otherwise humanises unknown kinds:
 
   | Kind | Note |
@@ -181,4 +181,4 @@ The website session's client portal Phase 1 is open as MohammadRstm/ID-Indetails
 
   The payload is `{ email }`.
 
-Nothing else: the staff portal endpoints (`api/projects/{id}/portal/…`) are web-first admin tools, and the client sign-in (`/api/portal/*`, its own token audience) has nothing to do with the staff app.
+Nothing else: the staff portal endpoints (`api/projects/{id}/portal/…`, including Phase 2's content uploads to Cloudflare R2) are web-first admin tools, and the client sign-in (`/api/portal/*`, its own token audience) has nothing to do with the staff app.
