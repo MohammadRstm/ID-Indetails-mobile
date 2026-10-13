@@ -124,6 +124,25 @@ describe("AdminTodayScreen", () => {
     expect(await screen.findByText("Send the quote")).toBeTruthy();
     expect(asked).toEqual(["deadlines"]);
   });
+
+  it("opens Proton from the header with the dashboard as its page", async () => {
+    serve();
+    await renderWithProviders(<AdminTodayScreen />, { persona: "designAdmin" });
+    await fireEvent.press(await screen.findByRole("button", { name: "Ask Proton" }));
+    expect(router.push).toHaveBeenCalledWith({
+      pathname: "/proton",
+      params: { page: "dashboard", area: "design" },
+    });
+  });
+
+  it("has no Proton button for an admin without proton:use", async () => {
+    serve();
+    await renderWithProviders(<AdminTodayScreen />, {
+      persona: withPermissions(personas.designAdmin, { revoke: [P.PROTON_USE] }),
+    });
+    await screen.findByText("Client review");
+    expect(screen.queryByRole("button", { name: "Ask Proton" })).toBeNull();
+  });
 });
 
 describe("deadlineWords", () => {

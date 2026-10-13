@@ -2,7 +2,9 @@ import { screen } from "@testing-library/react-native";
 import { http, HttpResponse } from "msw";
 import { designSettings, myProject, schedule } from "@/features/work/testing";
 import { companyToday } from "@/format/time";
+import { P } from "@/permissions/codes";
 import { api } from "@test/handlers";
+import { personas, withPermissions } from "@test/personas";
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
 import { DesignTodayScreen } from "./design/screens/DesignTodayScreen";
@@ -91,4 +93,36 @@ it("gives site staff their sites and Add materials, and no hours", async () => {
   expect(await screen.findByText("Faqra chalet")).toBeTruthy();
   expect(screen.getByRole("button", { name: "Add materials" })).toBeTruthy();
   expect(screen.queryByText(/Start the timer|Log work/)).toBeNull();
+});
+
+describe("Proton in the header", () => {
+  const withProton = (name: "designEmployee" | "executionEmployee") =>
+    withPermissions(personas[name], { grant: [P.PROTON_USE] });
+
+  it("is not on a Design employee's Today without proton:use", async () => {
+    serveDesignDay(true);
+    await renderWithProviders(<DesignTodayScreen />, { persona: "designEmployee" });
+    await screen.findByText("1h 30m of 7h 00m");
+    expect(screen.queryByRole("button", { name: "Ask Proton" })).toBeNull();
+  });
+
+  it("is on a Design employee's Today with proton:use", async () => {
+    serveDesignDay(true);
+    await renderWithProviders(<DesignTodayScreen />, { persona: withProton("designEmployee") });
+    expect(await screen.findByRole("button", { name: "Ask Proton" })).toBeTruthy();
+  });
+
+  it("is on site staff's Today when they hold proton:use", async () => {
+    server.use(
+      http.get(api("/projects"), () =>
+        HttpResponse.json({ items: [], page: 1, pageSize: 100, totalCount: 0 }),
+      ),
+      http.get(api("/projects/site-summary"), () => HttpResponse.json([])),
+      http.get(api("/me/requirements"), () => HttpResponse.json(noRequirements)),
+    );
+    await renderWithProviders(<ExecutionTodayScreen />, {
+      persona: withProton("executionEmployee"),
+    });
+    expect(await screen.findByRole("button", { name: "Ask Proton" })).toBeTruthy();
+  });
 });
