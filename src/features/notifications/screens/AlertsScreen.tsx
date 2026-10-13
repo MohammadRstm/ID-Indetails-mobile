@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toApiError } from "@/api/errors";
 import type { Notification } from "@/api/types";
 import { dayKey, relDay } from "@/format/time";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { routeForTarget } from "@/navigation/targets";
 import { useOfflineBanner } from "@/offline/useOnline";
 import { usePermissions } from "@/permissions/usePermissions";
@@ -58,6 +59,7 @@ export function AlertsScreen() {
           title="Alerts"
           actions={
             <>
+              <ProtonEntry page="notifications" compact />
               <IconButton
                 icon="check"
                 accessibilityLabel="Mark all read"

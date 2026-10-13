@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
 import { toApiError } from "@/api/errors";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { useOfflineBanner } from "@/offline/useOnline";
 import {
   addMonths,
@@ -64,14 +65,17 @@ export function WorkScreen() {
         <ScreenHeader
           title="Work"
           actions={
-            <IconButton
-              icon="plus"
-              accessibilityLabel="Log work"
-              onPress={() => {
-                requestLogWork({});
-                router.push("/log-work");
-              }}
-            />
+            <>
+              <ProtonEntry page="my_work" compact />
+              <IconButton
+                icon="plus"
+                accessibilityLabel="Log work"
+                onPress={() => {
+                  requestLogWork({});
+                  router.push("/log-work");
+                }}
+              />
+            </>
           }
         />
       }

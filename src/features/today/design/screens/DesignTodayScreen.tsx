@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { toApiError } from "@/api/errors";
 import { useCurrentUser } from "@/auth/session";
 import { MeetingRow } from "@/features/meetings/components/MeetingRow";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { MyRequirementRow } from "@/features/requirements/components/MyRequirementRow";
 import { useMyRequirements } from "@/features/requirements/api";
 import { useTimerState } from "@/features/timer/store";
@@ -70,7 +71,12 @@ export function DesignTodayScreen() {
           title={`Hi ${me.firstName}`}
           subtitle={fmtDayDateY(today)}
           actions={
-            logs ? <IconButton icon="plus" accessibilityLabel="Log work" onPress={logWork} /> : null
+            <>
+              <ProtonEntry page="dashboard" />
+              {logs ? (
+                <IconButton icon="plus" accessibilityLabel="Log work" onPress={logWork} />
+              ) : null}
+            </>
           }
         />
       }

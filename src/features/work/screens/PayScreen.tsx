@@ -1,6 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { toApiError } from "@/api/errors";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import {
   addMonths,
   companyToday,
@@ -46,7 +47,13 @@ export function PayScreen() {
 
   return (
     <Screen
-      header={<ScreenHeader title="My pay" onBack={() => router.back()} />}
+      header={
+        <ScreenHeader
+          title="My pay"
+          onBack={() => router.back()}
+          actions={<ProtonEntry page="my_pay" compact />}
+        />
+      }
       refreshing={pay.isRefetching}
       onRefresh={() => void pay.refetch()}
     >

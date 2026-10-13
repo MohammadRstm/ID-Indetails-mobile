@@ -3,6 +3,7 @@ import { toApiError } from "@/api/errors";
 import { useCurrentUser } from "@/auth/session";
 import { useLabourWeeksOf } from "@/features/labour/api";
 import { useProjects, useSiteSummaries } from "@/features/projects/api";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { MyRequirementRow } from "@/features/requirements/components/MyRequirementRow";
 import { useMyRequirements } from "@/features/requirements/api";
 import { PendingBanner } from "@/features/sites/components/PendingBanner";
@@ -52,7 +53,13 @@ export function ExecutionTodayScreen() {
 
   return (
     <Screen
-      header={<ScreenHeader title={`Hi ${me.firstName}`} subtitle={fmtDayDateY(today)} />}
+      header={
+        <ScreenHeader
+          title={`Hi ${me.firstName}`}
+          subtitle={fmtDayDateY(today)}
+          actions={<ProtonEntry page="dashboard" />}
+        />
+      }
       banner={banner}
       refreshing={projects.isRefetching}
       onRefresh={() => {
