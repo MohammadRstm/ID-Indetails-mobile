@@ -34,6 +34,8 @@ const usage: Schemas["ProtonUsageResponse"] = {
   questionsRemaining: 87,
   questionsUsed: 13,
   usedPct: 13,
+  voiceAvailable: false,
+  voiceMaxMinutes: 10,
 };
 
 const CONVERSATION = "11111111-1111-1111-1111-111111111111";
@@ -288,9 +290,7 @@ describe("Proton's cards", () => {
     await fireEvent.press(confirms[1]);
     await waitFor(() => expect(decided).toHaveLength(1));
     expect(decided[0].path).toBe(`${OTHER_ACTION}/confirm`);
-    await waitFor(() =>
-      expect(screen.getAllByRole("button", { name: "Confirm" })).toHaveLength(1),
-    );
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Confirm" })).toHaveLength(1));
   });
 
   it("falls back to the last card when the reply lists no others", async () => {

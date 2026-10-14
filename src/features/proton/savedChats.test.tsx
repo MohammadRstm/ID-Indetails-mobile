@@ -36,6 +36,8 @@ const usage: Schemas["ProtonUsageResponse"] = {
   questionsRemaining: 87,
   questionsUsed: 13,
   usedPct: 13,
+  voiceAvailable: false,
+  voiceMaxMinutes: 10,
 };
 
 const source = { tool: "get_time_summary", dataset: "d1", asOf: "2026-10-13T09:30:00Z" };

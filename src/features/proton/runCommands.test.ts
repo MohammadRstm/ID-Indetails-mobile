@@ -196,9 +196,10 @@ describe("filling log work", () => {
   });
 
   it("lets an end before the start run past midnight, and skips an end equal to the start", () => {
-    expect(logWorkRequestOf(logWork({ startMinute: 1320, endMinute: 120 })).request).toMatchObject(
-      { startMin: 1320, endMin: 1560 },
-    );
+    expect(logWorkRequestOf(logWork({ startMinute: 1320, endMinute: 120 })).request).toMatchObject({
+      startMin: 1320,
+      endMin: 1560,
+    });
     const same = logWorkRequestOf(logWork({ startMinute: 600, endMinute: 600 }));
     expect(same.request.endMin).toBeUndefined();
     expect(same.filled).toEqual(["start"]);

@@ -238,11 +238,7 @@ export function Gallery() {
           now="2026-10-08T12:15:00Z"
         />
         <View style={styles.row}>
-          <ProgressRing
-            value={0.7}
-            accessibilityLabel="Hours logged today"
-            summary="5h 36m of 8h."
-          >
+          <ProgressRing value={0.7} accessibilityLabel="Hours logged today" summary="5h 36m of 8h.">
             <Text variant="figure">5h 36m</Text>
           </ProgressRing>
           <ProgressRing

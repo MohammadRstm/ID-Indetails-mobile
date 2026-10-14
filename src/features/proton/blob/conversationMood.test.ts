@@ -42,6 +42,7 @@ const reply = (...cards: ProtonPendingAction[]): ProtonTurn => ({
   quickReplies: [],
   suggestions: [],
   did: null,
+  blocks: [],
 });
 
 const idle = { turns: [], actions: {}, live: null, blocked: false };

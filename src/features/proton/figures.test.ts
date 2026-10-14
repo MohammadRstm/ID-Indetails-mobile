@@ -143,4 +143,3 @@ describe("pointLabel and pointTitle", () => {
     expect(pointTitle("month", "2026-03-01")).toBe("Mar 2026");
   });
 });
-

@@ -37,7 +37,7 @@ describe("ContributorsList", () => {
       <ContributorsList contributors={people} totalMinutes={3000} entryCount={21} />,
     );
     expect(screen.queryByText("Gus")).toBeNull();
-    fireEvent.press(screen.getByRole("button", { name: "1 more" }));
+    await fireEvent.press(screen.getByRole("button", { name: "1 more" }));
     expect(screen.getByText("Gus")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "1 more" })).toBeNull();
   });
