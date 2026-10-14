@@ -163,8 +163,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     experiments: {
       reactCompiler: true,
     },
+    owner: "mohammadrstms-team",
     extra: {
       variant,
+      eas: { projectId: "be76b1a1-b799-4c23-951f-40443decb0c0" },
     },
   };
 };
