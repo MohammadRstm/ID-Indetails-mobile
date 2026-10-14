@@ -93,9 +93,12 @@ export function useProtonChat(page: ProtonPageContext | null) {
     [cancelRunning, userId],
   );
 
+  // Reopen the last chat after the first render, not during the effect, so its loading state doesn't cascade.
   useEffect(() => {
     const id = readOpenChat(userId);
-    if (id) void open(id);
+    if (!id) return;
+    const timer = setTimeout(() => void open(id), 0);
+    return () => clearTimeout(timer);
   }, [open, userId]);
 
   async function send(question: Question, id: string | null, retried = false): Promise<void> {
