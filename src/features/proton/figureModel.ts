@@ -67,7 +67,7 @@ export function truncationNote(table: ProtonTableBlock): string | null {
     : null;
 }
 
-export type KpiTile ={ key: string; label: string; value: string; sub: string | null };
+export type KpiTile = { key: string; label: string; value: string; sub: string | null };
 
 /** Headline figures as tiles: the value, and the change against the previous period when there is one. */
 export function kpiTiles(kpis: ProtonKpiBlock): KpiTile[] {

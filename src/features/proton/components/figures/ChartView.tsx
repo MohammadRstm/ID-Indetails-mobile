@@ -89,11 +89,7 @@ export function ChartView({ chart, accessibilityLabel }: ChartViewProps) {
           ))}
         </View>
       ) : null}
-      {chart.kind === "line" && gaps === 0 ? (
-        <LineChart {...drawn} />
-      ) : (
-        <ColumnsChart {...drawn} />
-      )}
+      {chart.kind === "line" && gaps === 0 ? <LineChart {...drawn} /> : <ColumnsChart {...drawn} />}
       <Text variant="small" tone="muted">
         {selected != null ? pointReadout(chart, selected) : "Tap a point for its figure."}
       </Text>
