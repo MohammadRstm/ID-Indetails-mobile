@@ -1,6 +1,7 @@
 import { router, useIsFocused } from "expo-router";
 import { useState } from "react";
 import { toApiError } from "@/api/errors";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { photoOf } from "@/features/work/photos";
 import { useOfflineBanner } from "@/offline/useOnline";
 import {
@@ -74,11 +75,14 @@ export function ConversationsScreen() {
         <ScreenHeader
           title="Messages"
           actions={
-            <IconButton
-              icon="edit"
-              accessibilityLabel="New message"
-              onPress={() => setPicking(true)}
-            />
+            <>
+              <ProtonEntry page="messages" compact />
+              <IconButton
+                icon="edit"
+                accessibilityLabel="New message"
+                onPress={() => setPicking(true)}
+              />
+            </>
           }
         />
       }

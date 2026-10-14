@@ -4,8 +4,10 @@ import {
   addDays,
   companyTimeToUtc,
   DAYS,
+  DAYS_LONG,
   dayKey,
   fmtDur,
+  fmtDurShort,
   fmtH,
   fmtHourLabel,
   fmtMinutes,
@@ -226,6 +228,16 @@ export function weekColumns(
       today: day === today,
     };
   });
+}
+
+/** The week's bars in a sentence for screen readers: the API's total for the week and the busiest day. */
+export function weekSummary(columns: WeekDay[], weekMinutes: number): string {
+  const busiest = columns.reduce<WeekDay | null>(
+    (top, d) => (d.minutes > 0 && (!top || d.minutes > top.minutes) ? d : top),
+    null,
+  );
+  if (!busiest) return "Nothing logged this week.";
+  return `${fmtH(weekMinutes)} this week, the most on ${DAYS_LONG[partsOf(busiest.key).weekday]} (${fmtDurShort(busiest.minutes)}).`;
 }
 
 type LedgerStatus = Schemas["LedgerStatus"];

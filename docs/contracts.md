@@ -190,7 +190,7 @@ Phase 1a creates them with their final exports and a working first version. Phas
 | `src/permissions/usePermissions.ts` | `usePermissions()` |
 | `src/permissions/screens.ts` | `screens` (every route key with its rule), `canOpen(perms, key)`, `tabsFor(perms)`, `persona(perms): "design_employee" \| "execution_employee" \| "admin" \| "super_admin"` |
 | `src/navigation/targets.ts` | `routeForTarget(target: PushTarget, perms): Href \| null`, `routeForProtonCommand(cmd, perms): Href \| null` |
-| `src/theme/tokens.ts` | `light`, `dark` (every web token), `radii`, `spacing` |
+| `src/theme/tokens.ts` | `light`, `dark` (every web token), `radii`, `spacing`, and the blob's `protonLight`, `protonDark`, `protonMoodColors` |
 | `src/theme/ThemeProvider.tsx` | `ThemeProvider`, `useTheme(): { colors, scheme: "light" \| "dark", preference, setPreference }` |
 | `src/theme/typography.ts` | Text variants (`title`, `heading`, `body`, `label`, `micro`, `mono`, `figure`, …) |
 | `src/format/*` | Ported `time.ts`, `money.ts`, `periods.ts`, `phone.ts` (company time zone always) |
@@ -229,8 +229,8 @@ Phase 1a creates each slot as a component that renders nothing, with its final p
 
 | Slot (`src/features/…`) | Props | Rendered by (where) | Owner |
 |---|---|---|---|
-| `projects/slots/AdminProjectActions.tsx` | `{ project }` | 2, project screen header | 3 |
-| `projects/slots/ProjectMoney.tsx` | `{ project }` | 2, project screen below the summary | 4 |
+| `projects/slots/AdminProjectActions.tsx` | `{ project, section? }` | 2, project screen header | 3 |
+| `projects/slots/ProjectMoney.tsx` | `{ project }` | 2, project screen, first section under the head | 4 |
 | `requirements/slots/RequirementManageActions.tsx` | `{ projectId, requirement }` | 2, each requirement row's menu | 3 |
 | `requirements/slots/AddRequirementButton.tsx` | `{ projectId }` | 2, project requirements header | 3 |
 | `people/slots/PersonSecurityActions.tsx` | `{ person }` | 3, person screen | 4 |

@@ -3,6 +3,7 @@ import { http, HttpResponse } from "msw";
 import { api } from "@test/handlers";
 import { renderWithProviders } from "@test/render";
 import { server } from "@test/server";
+import { setProtonDraft, takeProtonDraft } from "@/features/proton/drafts";
 import { openChat } from "../openChat";
 import { ChatThread } from "./ChatThread";
 
@@ -24,6 +25,7 @@ const sent = {
   mentions: [],
   sender: { id: 4, name: "Sarah Test", photoFileId: null },
   taskComment: null,
+  viaProton: false,
 };
 
 function serveThread() {
@@ -79,4 +81,22 @@ it("marks the chat read, says it is open, and sends with the message shown at on
   await waitFor(() =>
     expect(screen.queryByRole("button", { name: "Not sent. Tap to retry" })).toBeNull(),
   );
+});
+
+it("starts with Proton's drafted message, marked, and sends nothing by itself", async () => {
+  serveThread();
+  let posted = 0;
+  server.use(
+    http.post(api("/messages/direct/9"), () => {
+      posted += 1;
+      return HttpResponse.json(sent, { status: 201 });
+    }),
+  );
+  setProtonDraft({ kind: "direct", userId: 9 }, "Running late, see you at 10.");
+  await renderWithProviders(<ChatThread chat={{ kind: "direct", userId: 9 }} title="Omar Test" />);
+  expect(await screen.findByDisplayValue("Running late, see you at 10.")).toBeTruthy();
+  expect(screen.getByText("Filled by Proton: message. Check it, then send.")).toBeTruthy();
+  expect(posted).toBe(0);
+  // a draft is given once: the next time the chat opens it starts empty
+  expect(takeProtonDraft({ kind: "direct", userId: 9 })).toBeNull();
 });

@@ -227,6 +227,12 @@ describe("routeForProtonCommand", () => {
     page: null,
     section: null,
     tab: null,
+    companyTab: null,
+    fill: null,
+    settingsSection: null,
+    sounds: null,
+    surface: null,
+    theme: null,
     ...c,
   });
 
@@ -256,6 +262,17 @@ describe("routeForProtonCommand", () => {
     });
   });
 
+  it("hands the project screen's own sections on to scroll to, and drops the web-only ones", () => {
+    const p = perms("designAdmin");
+    const open = (section: ProtonUiCommand["section"]) =>
+      routeForProtonCommand(command({ type: "open_project", id: 8, domain: "design", section }), p);
+    for (const section of ["financials", "overview", "contributors", "meetings"] as const) {
+      expect(open(section)).toEqual({ pathname: "/projects/[id]", params: { id: "8", section } });
+    }
+    expect(open("analytics")).toEqual({ pathname: "/projects/[id]", params: { id: "8" } });
+    expect(open("timeline")).toEqual({ pathname: "/projects/[id]", params: { id: "8" } });
+  });
+
   it("refuses a project in a domain the person can't see", () => {
     expect(
       routeForProtonCommand(
@@ -283,6 +300,125 @@ describe("routeForProtonCommand", () => {
     const sa = perms("superAdmin");
     expect(routeForProtonCommand(command({ page: "reports", domain: "design" }), sa)).toBeNull();
     expect(routeForProtonCommand(command({ page: "company_expenses" }), sa)).toBeNull();
+  });
+
+  it("opens the person's own pages, settings, messages and notifications", () => {
+    const sarah = perms("designEmployee");
+    const page = (name: ProtonUiCommand["page"]) =>
+      routeForProtonCommand(command({ page: name, domain: "design" }), sarah);
+    expect(page("my_work")).toBe("/work");
+    expect(page("my_pay")).toBe("/pay");
+    expect(page("my_profile")).toBe("/profile");
+    expect(page("messages")).toBe("/messages");
+    expect(page("notifications")).toBe("/alerts");
+    expect(page("settings")).toBe("/settings");
+  });
+
+  it("checks the person's permissions and domain for those pages too", () => {
+    // pay is built on logged hours: Design only
+    expect(
+      routeForProtonCommand(command({ page: "my_pay", domain: null }), perms("executionEmployee")),
+    ).toBeNull();
+    // an admin logs no hours
+    expect(
+      routeForProtonCommand(command({ page: "my_work", domain: null }), perms("designAdmin")),
+    ).toBeNull();
+    expect(
+      routeForProtonCommand(
+        command({ page: "settings", domain: "execution" }),
+        perms("designEmployee"),
+      ),
+    ).toBeNull();
+  });
+
+  it("leaves the web-only pages unopened", () => {
+    const sa = perms("superAdmin");
+    const webOnly = [
+      "help",
+      "launcher",
+      "schedules",
+      "salaries",
+      "project_pay",
+      "proton_budget",
+      "company_settings",
+      "company_profile",
+    ] as const;
+    for (const page of webOnly) {
+      expect(routeForProtonCommand(command({ page, domain: null }), sa)).toBeNull();
+    }
+  });
+
+  it("opens the surfaces the phone has a screen for", () => {
+    const surface = (
+      name: ProtonUiCommand["surface"],
+      who: PersonaName,
+      change: Partial<ProtonUiCommand> = {},
+    ) =>
+      routeForProtonCommand(
+        command({ type: "open_surface", surface: name, domain: null, ...change }),
+        perms(who),
+      );
+    expect(surface("log_work", "designEmployee")).toBe("/log-work");
+    expect(surface("new_meeting", "designEmployee")).toBe("/meetings/new");
+    expect(surface("record_payment", "superAdmin")).toBe("/billing/payments/new");
+    expect(surface("settings_section", "executionEmployee")).toBe("/settings");
+    expect(surface("message_person", "designEmployee", { id: 9 })).toEqual({
+      pathname: "/messages/direct/[userId]",
+      params: { userId: "9" },
+    });
+    expect(surface("message_team", "designEmployee", { id: 5 })).toEqual({
+      pathname: "/messages/team/[teamId]",
+      params: { teamId: "5" },
+    });
+  });
+
+  it("checks permissions, domain and ids for every surface", () => {
+    const surface = (
+      name: ProtonUiCommand["surface"],
+      who: PersonaName,
+      change: Partial<ProtonUiCommand> = {},
+    ) =>
+      routeForProtonCommand(
+        command({ type: "open_surface", surface: name, domain: null, ...change }),
+        perms(who),
+      );
+    // logged hours are Design's, and an admin logs none
+    expect(surface("log_work", "executionEmployee")).toBeNull();
+    expect(surface("log_work", "designAdmin")).toBeNull();
+    expect(surface("log_work", "designEmployee", { domain: "execution" })).toBeNull();
+    expect(surface("new_meeting", "customGrants")).toBeNull();
+    expect(surface("record_payment", "designAdmin")).toBeNull();
+    expect(surface("message_person", "designEmployee", { id: null })).toBeNull();
+    expect(surface("message_team", "designEmployee", { id: -5 })).toBeNull();
+  });
+
+  it("leaves every other surface on the web", () => {
+    const sa = perms("superAdmin");
+    for (const name of [
+      "new_project",
+      "new_client",
+      "invite_person",
+      "edit_project",
+      "edit_client",
+      "project_report",
+      "new_invoice",
+      "new_statement",
+      "add_company_expense",
+      "report_bug",
+      "company_overview_tab",
+    ] as const) {
+      expect(
+        routeForProtonCommand(command({ type: "open_surface", surface: name, id: 3 }), sa),
+      ).toBeNull();
+    }
+    expect(routeForProtonCommand(command({ type: "open_surface", surface: null }), sa)).toBeNull();
+  });
+
+  it("does nothing here for a form fill or a display choice", () => {
+    const sa = perms("superAdmin");
+    for (const type of ["fill_form", "set_preference"] as const) {
+      expect(routeForProtonCommand(command({ type }), sa)).toBeNull();
+    }
   });
 
   it("keeps the company's figures to super admins", () => {

@@ -43,6 +43,8 @@ type LogWorkViewProps = {
   /** How long a short timer run really was, when it is logged as 5 minutes. */
   shortTimer?: number;
   attachment: ReactNode;
+  /** A note above the form, such as what Proton filled in. */
+  notice?: ReactNode;
   /** What stops the save, in words. */
   problem: string | null;
   saving: boolean;
@@ -60,6 +62,7 @@ export function LogWorkView(props: LogWorkViewProps) {
 
   return (
     <View style={styles.form}>
+      {props.notice}
       <Select
         label="Project"
         value={props.projectId}
@@ -84,7 +87,17 @@ export function LogWorkView(props: LogWorkViewProps) {
             <TimeField label="End" value={props.endMin} onChange={props.onEndChange} />
           </View>
         </View>
-        <DayRuler blocks={[props.block]} others={props.others} now={props.now} />
+        <DayRuler
+          accessibilityLabel="Where this entry sits in the day"
+          summary={`${fmtDayDate(props.date)}, ${fmtDur(props.duration)}${
+            props.others.length > 0
+              ? `, with ${props.others.length} other ${props.others.length === 1 ? "entry" : "entries"} that day`
+              : ""
+          }.`}
+          blocks={[props.block]}
+          others={props.others}
+          now={props.now}
+        />
         <Text variant="small" tone="secondary">
           {fmtDayDate(props.date)} · <Text variant="mono">{fmtDur(props.duration)}</Text>
           {props.endsNextDay ? " (ends the next day)" : ""}

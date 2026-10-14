@@ -5,11 +5,15 @@ import { formatSettings, partsOf, type DateValue } from "@/format/time";
 import { useTheme } from "@/theme/ThemeProvider";
 import { radii } from "@/theme/tokens";
 import { Text } from "../Text";
-import { clamp } from "./core";
+import { chartDescription, clamp } from "./core";
 
 export type RulerBlock = { start: DateValue; end: DateValue; color?: string };
 
 type DayRulerProps = {
+  /** What the ruler shows, for screen readers: "Where today's hours sit". */
+  accessibilityLabel: string;
+  /** A short sentence about its data, for screen readers, worded by the caller who holds the data. */
+  summary: string;
   /** The blocks being shown (this entry). */
   blocks?: RulerBlock[];
   /** Other entries the same day, greyed. */
@@ -25,6 +29,8 @@ type DayRulerProps = {
 
 /** Where blocks of work sat in the company's day. */
 export function DayRuler({
+  accessibilityLabel,
+  summary,
   blocks = [],
   others = [],
   now,
@@ -43,7 +49,11 @@ export function DayRuler({
   const inset = large ? 3 : 0;
 
   return (
-    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={chartDescription(accessibilityLabel, summary)}
+    >
       <View
         style={[
           styles.ruler,

@@ -21,11 +21,13 @@ export type ProjectListParams = {
 };
 
 export type SiteRecords = Schemas["SiteRecordsResponse"];
+export type ProjectWork = Schemas["ProjectWorkResponse"];
 
 export const projectKeys = {
   all: ["projects"] as const,
   list: (params: ProjectListParams) => ["projects", "list", params] as const,
   detail: (id: number) => ["projects", "detail", id] as const,
+  work: (id: number) => ["projects", "work", id] as const,
   siteSummary: (ids: number[]) => ["projects", "siteSummary", ids] as const,
   siteRecords: ["projects", "siteRecords"] as const,
 };
@@ -47,6 +49,15 @@ export function useProject(id: number) {
   return useQuery({
     queryKey: projectKeys.detail(id),
     queryFn: async () => (await http.get<Project>(`/projects/${id}`)).data,
+  });
+}
+
+/** Everyone's logged work on a Design project: its totals and who put the hours in. Needs work_entry:view_all. */
+export function useProjectWork(id: number, enabled: boolean) {
+  return useQuery({
+    queryKey: projectKeys.work(id),
+    queryFn: async () => (await http.get<ProjectWork>(`/projects/${id}/work`)).data,
+    enabled,
   });
 }
 

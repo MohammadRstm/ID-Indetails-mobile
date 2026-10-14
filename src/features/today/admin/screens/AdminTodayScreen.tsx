@@ -1,6 +1,7 @@
 import { router, type Href } from "expo-router";
 import { StyleSheet, View } from "react-native";
 import { useCurrentUser } from "@/auth/session";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { companyToday, fmtDayDate, fmtTime } from "@/format/time";
 import { routeForTarget } from "@/navigation/targets";
 import { P } from "@/permissions/codes";
@@ -11,7 +12,6 @@ import {
   Badge,
   Card,
   EmptyState,
-  IconButton,
   ListRow,
   Screen,
   ScreenHeader,
@@ -70,15 +70,7 @@ export function AdminTodayScreen() {
         <ScreenHeader
           title={`Hello, ${me.firstName ?? "there"}`}
           subtitle={fmtDayDate(today)}
-          actions={
-            perms.has(P.PROTON_USE) ? (
-              <IconButton
-                icon="compass"
-                accessibilityLabel="Ask Proton"
-                onPress={() => router.push("/proton")}
-              />
-            ) : undefined
-          }
+          actions={<ProtonEntry page="dashboard" domain={domain} />}
         />
       }
       refreshing={deadlines.isRefetching || meetings.isRefetching}

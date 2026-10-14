@@ -10,12 +10,14 @@ type ScreenHeaderProps = {
   subtitle?: string;
   /** Shows a back button; the smart screen decides where back goes. */
   onBack?: () => void;
+  /** Something between the back button and the title (Proton's blob). */
+  leading?: ReactNode;
   /** Icon buttons on the right. */
   actions?: ReactNode;
 };
 
 /** A screen's title bar: back, the page title (the web's `.page-title`), and actions. */
-export function ScreenHeader({ title, subtitle, onBack, actions }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, onBack, leading, actions }: ScreenHeaderProps) {
   const { colors } = useTheme();
   return (
     <View
@@ -26,6 +28,7 @@ export function ScreenHeader({ title, subtitle, onBack, actions }: ScreenHeaderP
       ]}
     >
       {onBack && <IconButton icon="chevronLeft" onPress={onBack} accessibilityLabel="Back" />}
+      {leading}
       <View style={styles.titles}>
         <Text variant={onBack ? "heading" : "title"} accessibilityRole="header" numberOfLines={1}>
           {title}

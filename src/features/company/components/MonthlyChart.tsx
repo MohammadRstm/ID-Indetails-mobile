@@ -6,7 +6,7 @@ import { MONTHS, partsOf } from "@/format/time";
 import { useTheme } from "@/theme/ThemeProvider";
 import { spacing } from "@/theme/tokens";
 import { Text } from "@/ui";
-import { barPath, niceMax } from "@/ui/charts/core";
+import { barPath, chartDescription, niceMax } from "@/ui/charts/core";
 
 export type MonthBar = {
   /** The month's first day, "yyyy-MM-01". */
@@ -18,11 +18,20 @@ export type MonthBar = {
 
 type MonthlyChartProps = {
   months: MonthBar[];
+  /** What the chart shows, for screen readers. */
+  accessibilityLabel: string;
+  /** A short sentence about its data, for screen readers, worded by the caller who holds the data. */
+  summary: string;
   height?: number;
 };
 
 /** Revenue against net profit, month by month: a pair of bars each, losses below the line. */
-export function MonthlyChart({ months, height = 150 }: MonthlyChartProps) {
+export function MonthlyChart({
+  months,
+  accessibilityLabel,
+  summary,
+  height = 150,
+}: MonthlyChartProps) {
   const { colors } = useTheme();
   const [width, setWidth] = useState(0);
   const top = Math.max(1, niceMax(Math.max(0, ...months.flatMap((m) => [m.revenue, m.netProfit]))));
@@ -32,16 +41,12 @@ export function MonthlyChart({ months, height = 150 }: MonthlyChartProps) {
   const zero = y(0);
   const slot = width / Math.max(1, months.length);
   const barW = Math.max(3, Math.min(12, (slot - 6) / 2));
-  const latest = months[months.length - 1];
 
   return (
     <View
+      accessible
       accessibilityRole="image"
-      accessibilityLabel={
-        latest
-          ? `Revenue and net profit by month. ${MONTHS[partsOf(latest.month).month]}: revenue ${money.exact(latest.revenue)}, net profit ${money.exact(latest.netProfit)}.`
-          : "Revenue and net profit by month"
-      }
+      accessibilityLabel={chartDescription(accessibilityLabel, summary)}
     >
       <View style={styles.legend}>
         <Swatch color={colors.chart} label="Revenue" />

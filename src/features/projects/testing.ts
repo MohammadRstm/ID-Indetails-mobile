@@ -1,5 +1,6 @@
 // Test data for the project screens' tests. Not used by the app.
 import type { Project, Requirement } from "@/api/types";
+import type { ProjectWork } from "./api";
 
 export function project(
   id: number,
@@ -45,4 +46,45 @@ export function requirement(id: number, change: Partial<Requirement> = {}): Requ
     text: `Requirement ${id}`,
     ...change,
   };
+}
+
+export function contributor(
+  userId: number,
+  name: string,
+  minutes: number,
+  change: Partial<ProjectWork["contributors"][number]> = {},
+): ProjectWork["contributors"][number] {
+  return {
+    entries: 3,
+    labourCost: null,
+    lastStartedAt: "2026-10-05T09:00:00Z",
+    minutes,
+    name,
+    overtimeMinutes: 0,
+    sharePct: 50,
+    userId,
+    weekly: [],
+    ...change,
+  };
+}
+
+export function projectWork(
+  projectId: number,
+  contributors: ProjectWork["contributors"],
+): ProjectWork {
+  const totalMinutes = contributors.reduce((sum, c) => sum + c.minutes, 0);
+  return {
+    activityLevel: "steady",
+    contributorCount: contributors.length,
+    contributors,
+    entryCount: contributors.reduce((sum, c) => sum + c.entries, 0),
+    hourHeat: [],
+    lastStartedAt: null,
+    minutesLast14Days: 0,
+    minutesPrevious14Days: 0,
+    projectId,
+    totalMinutes,
+    totalOvertimeMinutes: 0,
+    weekly: [],
+  } as ProjectWork;
 }

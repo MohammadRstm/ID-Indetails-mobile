@@ -2,6 +2,7 @@ import type { PushTarget } from "@/api/mobileTypes";
 import type { Notification, Schemas } from "@/api/types";
 import { money } from "@/format/money";
 import type { PeriodKind } from "@/format/periods";
+import { MONTHS, partsOf } from "@/format/time";
 import type { Domain } from "@/permissions/permissions";
 import type { IconName } from "@/ui";
 
@@ -14,6 +15,22 @@ export type MoneyAttention = Schemas["MoneyAttentionResponse"];
 export type CompanyOverview = Schemas["CompanyOverviewResponse"];
 export type DomainOverview = Schemas["DomainOverviewResponse"];
 export type CompanyMonth = Schemas["CompanyMonthResponse"];
+
+/**
+ * The monthly chart in a sentence for screen readers: the latest month and the month with the most revenue,
+ * with the API's figures as they are.
+ */
+export function monthlySummary(
+  months: Pick<CompanyMonth, "month" | "revenue" | "netProfit">[],
+): string {
+  const latest = months[months.length - 1];
+  if (!latest) return "No months to show.";
+  const describe = (m: (typeof months)[number]) =>
+    `${MONTHS[partsOf(m.month).month]} revenue ${money.exact(m.revenue)}, net profit ${money.exact(m.netProfit)}`;
+  const best = months.reduce((top, m) => (m.revenue > top.revenue ? m : top), latest);
+  const text = `${months.length} months. Latest: ${describe(latest)}.`;
+  return best === latest ? text : `${text} Most revenue: ${describe(best)}.`;
+}
 
 export const DOMAIN_LABEL: Record<Domain, string> = { design: "Design", execution: "Execution" };
 

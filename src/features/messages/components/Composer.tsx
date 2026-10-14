@@ -1,5 +1,6 @@
 import { Image } from "expo-image";
 import { ActivityIndicator, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { FilledNote } from "@/features/proton/components/FilledNote";
 import { useTheme } from "@/theme/ThemeProvider";
 import { radii, spacing } from "@/theme/tokens";
 import { typography } from "@/theme/typography";
@@ -23,6 +24,8 @@ type ComposerProps = {
   error: string | null;
   canSend: boolean;
   onSend: () => void;
+  /** The text was written by Proton and not yet sent. */
+  fromProton?: boolean;
 };
 
 /** Writing a message: text with @mentions in team chats, up to 10 photos or videos, and Send. */
@@ -30,6 +33,7 @@ export function Composer(props: ComposerProps) {
   const { colors } = useTheme();
   return (
     <View style={[styles.wrap, { backgroundColor: colors.surface, borderTopColor: colors.line }]}>
+      {props.fromProton ? <FilledNote fields={["message"]} then="send" /> : null}
       {props.mentionCandidates.length > 0 ? (
         <ScrollView
           horizontal

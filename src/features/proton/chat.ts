@@ -1,11 +1,22 @@
-import type { ProtonChoice, ProtonPendingAction, ProtonRef, ProtonSource } from "./api";
+import type {
+  ProtonChoice,
+  ProtonPendingAction,
+  ProtonQuickReplyOption,
+  ProtonRef,
+  ProtonSource,
+} from "./api";
+import type { ProtonBlock } from "./figures";
 
 /** Where a proposed change stands in the chat. Only "open" can still be confirmed. */
 export type ActionState =
   | { kind: "open" }
   | { kind: "done"; message: string }
   | { kind: "cancelled" }
-  | { kind: "failed"; message: string };
+  | { kind: "failed"; message: string }
+  /** The card lost track of its status: it asks the API what became of it, and stays closed until it knows. */
+  | { kind: "closed" }
+  | { kind: "replaced" }
+  | { kind: "expired" };
 
 export type ProtonTurn =
   | { from: "you"; text: string }
@@ -14,10 +25,19 @@ export type ProtonTurn =
       text: string;
       refs: ProtonRef[];
       sources: ProtonSource[];
-      action: ProtonPendingAction | null;
+      /** The changes proposed in this reply, each waiting for its own Confirm. */
+      cards: ProtonPendingAction[];
       /** Options to pick from; only the newest reply's can still be picked. */
       choices: ProtonChoice[];
+      /** Answers to Proton's own question (a period, yes or no), as buttons; only the newest reply's can be tapped. */
+      quickReplies: ProtonQuickReplyOption[];
+      /** Things the person might say next; only the newest reply's can be tapped. */
+      suggestions: string[];
       /** What the app did for this reply ("Opened Villa Mounir."), if anything. */
       did: string | null;
+      /** Charts, tables and headline figures shown under the answer. */
+      blocks: ProtonBlock[];
     }
+  /** Something the app says about the chat itself: that an answer was stopped, or the chat was summed up. */
+  | { from: "note"; text: string }
   | { from: "error"; text: string };

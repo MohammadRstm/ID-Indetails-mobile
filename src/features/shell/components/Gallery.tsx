@@ -224,18 +224,31 @@ export function Gallery() {
       </Section>
 
       <Section title="Charts">
-        <WeekBars days={WEEK} />
+        <WeekBars
+          days={WEEK}
+          accessibilityLabel="Hours this week"
+          summary="Sample week: the most on Tuesday, 8h 45m."
+        />
         <DayRuler
+          accessibilityLabel="Where the hours sit in the day"
+          summary="Sample day: one block in the morning."
           large
           blocks={[{ start: "2026-10-08T06:00:00Z", end: "2026-10-08T08:30:00Z" }]}
           others={[{ start: "2026-10-08T10:00:00Z", end: "2026-10-08T11:00:00Z" }]}
           now="2026-10-08T12:15:00Z"
         />
         <View style={styles.row}>
-          <ProgressRing value={0.7}>
+          <ProgressRing value={0.7} accessibilityLabel="Hours logged today" summary="5h 36m of 8h.">
             <Text variant="figure">5h 36m</Text>
           </ProgressRing>
-          <ProgressRing value={1} tone="ok" size={64} stroke={6} />
+          <ProgressRing
+            value={1}
+            tone="ok"
+            size={64}
+            stroke={6}
+            accessibilityLabel="Hours logged today"
+            summary="The day's hours are logged."
+          />
         </View>
       </Section>
 

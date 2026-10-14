@@ -11,6 +11,7 @@ import {
 import { DomainCard } from "@/features/company/components/DomainCard";
 import { CountTile, TileGrid } from "@/features/company/components/MoneyLines";
 import { DOMAIN_LABEL } from "@/features/company/model";
+import { ProtonEntry } from "@/features/proton/slots/ProtonEntry";
 import { periodRange } from "@/format/periods";
 import { P } from "@/permissions/codes";
 import { DOMAINS, type Domain } from "@/permissions/permissions";
@@ -63,7 +64,13 @@ export function CompanyTodayScreen() {
 
   return (
     <Screen
-      header={<ScreenHeader title="Company" subtitle={range.label} />}
+      header={
+        <ScreenHeader
+          title="Company"
+          subtitle={range.label}
+          actions={<ProtonEntry page="dashboard" />}
+        />
+      }
       refreshing={overview.isRefetching || attention.isRefetching}
       onRefresh={() => {
         void overview.refetch();
