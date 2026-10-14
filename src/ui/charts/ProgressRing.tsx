@@ -44,6 +44,7 @@ export function ProgressRing({
   return (
     <View
       style={{ width: size, height: size }}
+      accessible
       accessibilityRole="progressbar"
       accessibilityLabel={chartDescription(accessibilityLabel, summary)}
       accessibilityValue={{ min: 0, max: 100, now: Math.round(fill * 100) }}

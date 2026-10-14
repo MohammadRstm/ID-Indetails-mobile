@@ -36,8 +36,6 @@ describe("the charts for screen readers", () => {
     await renderWithProviders(
       <ProgressRing value={0.5} accessibilityLabel="Hours logged today" summary="4h of 8h." />,
     );
-    expect(
-      screen.getByRole("progressbar", { name: "Hours logged today. 4h of 8h." }),
-    ).toBeTruthy();
+    expect(screen.getByRole("progressbar", { name: "Hours logged today. 4h of 8h." })).toBeTruthy();
   });
 });
