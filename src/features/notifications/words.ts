@@ -311,6 +311,41 @@ export function describe(note: Notification, reader: Reader): NotificationView {
         target: subject("client"),
       };
 
+    // the phone has no client portal or project files tab: these open the project
+    case "portal_client_message":
+      return {
+        text:
+          note.count > 1
+            ? `${note.count} new client messages in ${title}`
+            : `${s(p.authorName) || who} sent a message in ${title}'s client portal`,
+        icon: "chat",
+        target: project(),
+      };
+    case "portal_client_comment":
+      return {
+        text:
+          note.count > 1
+            ? `${note.count} new client comments on ${s(p.itemTitle) || "a file"} in ${title}`
+            : `${s(p.authorName) || who} commented on ${s(p.itemTitle) || "a file"} in ${title}`,
+        icon: "chat",
+        target: project(),
+      };
+    case "portal_mention":
+      return {
+        text: `${s(p.authorName) || who} mentioned you in ${title}'s client portal`,
+        icon: "chat",
+        target: project(),
+      };
+    case "project_file_comment":
+      return {
+        text:
+          note.count > 1
+            ? `${note.count} new comments on ${s(p.fileTitle) || "a file"} in ${title}`
+            : `${s(p.authorName) || who} commented on ${s(p.fileTitle) || "a file"} in ${title}`,
+        icon: "chat",
+        target: project(),
+      };
+
     case "invitation_accepted": {
       const role = ROLE[s(p.role)];
       return {
