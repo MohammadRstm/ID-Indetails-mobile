@@ -56,7 +56,12 @@ const DESIGN_ONLY: PermissionCode[] = [
   P.WORK_ENTRY_VIEW_OWN,
   P.WORK_ENTRY_VIEW_ALL,
   P.WORK_ENTRY_COMMENT,
+  P.CLIENT_ACCESS_MANAGE,
+  P.CLIENT_PORTAL_MANAGE,
+  P.PROJECT_FILES_MANAGE,
 ];
+/** Choosing the client's files and publishing them: super admins only, unless granted. Admins manage the project's files. */
+const CLIENT_PORTAL: PermissionCode[] = [P.CLIENT_PORTAL_MANAGE];
 /** Logging one's own hours: employees only. Admins and super admins are paid a fixed salary and log no hours. */
 const OWN_WORK: PermissionCode[] = [P.WORK_ENTRY_CREATE, P.WORK_ENTRY_VIEW_OWN];
 
@@ -137,7 +142,7 @@ export const personas: Record<PersonaName, CurrentUser> = {
     "Nadia",
     "admin",
     "design",
-    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, EXECUTION_ONLY, OWN_WORK),
+    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, EXECUTION_ONLY, OWN_WORK, CLIENT_PORTAL),
     "Design director",
   ),
   executionAdmin: user(
