@@ -7,7 +7,7 @@ What changed in the API and the website since the phone app was merged (8 to 13 
 | API | `master` from `5f197d3` (the mobile API merge) to `8845537`: 78 commits |
 | Website | `main` from `4cd10cd` (the state the phone was ported from) to `a6ab622`: 65 commits |
 
-**Status: waiting for approval.** Nothing here is built yet.
+**Status: built and merged.** The client portal catch-up (below) followed on `MR-Mobile-Portal-Catchup`.
 
 ## Contents
 
@@ -163,22 +163,12 @@ Order: 6A → 6B → 6C → 6D → 6E, then 6F if approved. 6A comes first becau
 - **Proton for employees:** no answer, so the recommended default applies: a Proton button in the Today header for everyone with `proton:use`, tabs unchanged.
 - **Migrations:** the phone and the website share one dev database, and the 5 Proton migrations belong to the website's work, not the phone's. Whether they are already applied is up to the sessions that wrote them. The phone has no unapplied migrations of its own, and nothing is applied from here.
 
-## Coming from the client portal (not merged yet)
+## Coming from the client portal (done)
 
-The website session's client portal Phase 1 is open as MohammadRstm/ID-Indetails-api#108 and MohammadRstm/ID-Indetails-client#116 (`docs/client-portal.md` on the API branch `MR-Client-Portal-Accounts`). When those merge, the phone needs:
+The client portal merged on the API and the website, and the phone caught up:
 
-- **Permission codes:** `client_access:manage` (Phase 1) and `client_portal:manage` (Phase 2, MohammadRstm/ID-Indetails-api#109 and MohammadRstm/ID-Indetails-client#117), both Design only and held by admins and super admins by default, added to `src/permissions/codes.ts` and its count test (56 codes).
-- **Activity wording:** words for the 6 new activity kinds in the phone's activity feed, which otherwise humanises unknown kinds:
-
-  | Kind | Note |
-  |---|---|
-  | `portal_client_invited` | |
-  | `portal_invitation_resent` | |
-  | `portal_invitation_revoked` | |
-  | `portal_invitation_accepted` | No actor |
-  | `portal_access_granted` | |
-  | `portal_access_revoked` | |
-
-  The payload is `{ email }`.
+- **Permission codes:** `client_access:manage`, `client_portal:manage` and `project_files:manage` are in `src/permissions/codes.ts` (57 codes). Super admins hold all three by default; Design admins hold `client_access:manage` and `project_files:manage` but not `client_portal:manage`; Execution admins and employees hold none.
+- **Activity wording:** the 7 portal activity kinds (`portal_client_invited`, `portal_invitation_resent`, `portal_invitation_revoked`, `portal_invitation_accepted`, `portal_access_granted`, `portal_access_revoked`, `portal_published`) have words in the activity feed. `portal_invitation_accepted` has no actor, so its row starts with the client's address.
+- **Notification wording:** the 4 kinds `portal_client_message`, `portal_client_comment`, `portal_mention` and `project_file_comment` have words, and a tap opens the project at the top.
 
 Nothing else: the staff portal endpoints (`api/projects/{id}/portal/…`, including Phase 2's content uploads to Cloudflare R2) are web-first admin tools, and the client sign-in (`/api/portal/*`, its own token audience) has nothing to do with the staff app.

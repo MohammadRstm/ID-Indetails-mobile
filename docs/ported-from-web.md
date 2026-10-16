@@ -2,7 +2,7 @@
 
 The web client can't be changed, so there is no shared package: these modules were copied from it. When the web changes one of them, compare and copy the change here.
 
-Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026). The Proton card modules and the generated types are as of its `main` at `a6ab622` (13 Oct 2026).
+Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026). The Proton card modules and the generated types are as of its `main` at `a6ab622` (13 Oct 2026). The permission codes, the activity words and the notification words are as of its `main` at `cf838e8` (16 Oct 2026).
 
 | App module | Web source | How it differs |
 |---|---|---|
@@ -21,7 +21,7 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/auth/brandingApi.ts` | `src/shared/components/Identity/useBranding.ts` | Same query and key |
 | `assets/fonts/*.ttf` | `@fontsource-variable/archivo`, `@fontsource-variable/martian-mono` (the web's `src/styles/fonts.css`) | Static instances at the widths the web sets with `font-stretch`, made by `scripts/fonts.py` (Latin and Latin Extended) |
 | `src/api/types.ts` | `src/api/types.ts` | More named aliases |
-| `src/permissions/codes.ts` | `src/app/permissions/codes.ts` | Unchanged |
+| `src/permissions/codes.ts` | `src/app/permissions/codes.ts` | Unchanged; 57 codes, as of web `main` at `cf838e8` |
 | `src/permissions/permissions.ts` | `src/app/permissions/permissions.ts` | `accessLabel` isn't ported |
 | `src/permissions/screens.ts` | `src/app/routing/routeTable.tsx` | The idea and the rules, rewritten for the phone's routes (one table, no domain in the path) |
 | `src/navigation/targets.ts` (`routeForProtonCommand`, `routeForProtonSurface`), `src/features/proton/runCommands.ts` | `src/domains/shared/proton/uiCommands.ts` (`stepOf`, `useRunProtonCommands`), `surfaces.ts` | Same rules (never an address, the domain and permissions checked, at most 3 commands in order, each different result line once), mapped onto the phone's screens: the person's own pages, settings, log work, new meeting, chats, record payment; reports, company expenses and every other form stay on the web. `open_project` opens requirements, materials and labour on their own screens, and passes `financials`, `overview`, `contributors` or `meetings` on as the project screen's `section` to scroll to (analytics and the timeline stay on the web, so the project opens at the top). A theme switch changes the app theme; message sounds are ignored. What a screen needs on arrival (log-work values, a chat draft) is left before it opens |
@@ -62,4 +62,5 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/features/projects/model.ts` | `src/domains/shared/projects/ProjectPage.tsx` (`allowed`, `tabOrder`), `ProjectRoute.tsx` (`hasOverview`), commits 5bb53ff and a465c21 | The web's tabs become one scroll in the order Money, Overview, Who worked, Requirements, Meetings, each under the web's rule (Financials `financial:view`; Contributors `work_entry:view_all` on Design; Overview for `work_entry:view_own`, or for someone with neither money nor everyone's work, always on Execution). Analytics and the calendar Timeline stay on the web, and a link to them (or to a hidden section) leaves the screen at the top. The `section` names are the web's tab names |
 | `src/features/projects/components/ContributorsList.tsx` | `src/domains/design/projects/DesignOverview.tsx` (`Contributors`) | Hours, share, overtime and last day per person from `GET /projects/{id}/work`; no labour cost, filters, sorting or drawer |
 | `test/personas.ts` | `src/test/personas.ts` | Adds `customGrants`, a Design employee who also records materials |
-| `src/features/notifications/words.ts` | `src/domains/shared/notifications/notificationWords.ts` | The web's words; each notification names its target instead of a web address, which the phone opens if the reader's permissions allow |
+| `src/features/notifications/words.ts` | `src/domains/shared/notifications/notificationWords.ts` | The web's words, as of web `main` at `cf838e8`; each notification names its target instead of a web address, which the phone opens if the reader's permissions allow. The client portal and file comment kinds (`portal_client_message`, `portal_client_comment`, `portal_mention`, `project_file_comment`) open the project at the top, since the phone has no Client portal or Project files section |
+| `src/features/activity/feedWords.ts` | `src/domains/shared/activity/feedWords.ts` | The web's words, as of web `main` at `cf838e8`, including the seven `portal_*` kinds. The accepted invitation has no actor, so its row starts with the client's address |
