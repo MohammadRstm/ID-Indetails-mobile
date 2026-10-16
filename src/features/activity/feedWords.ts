@@ -22,6 +22,20 @@ const client = (e: FeedEvent) => e.client?.name || "a client";
 const dash = (amount: number | null, currency?: string | null) =>
   amount == null ? "" : ` - ${money.fmt(amount, currency ?? "USD")}`;
 const quoted = (v: unknown) => (str(v) ? ` “${str(v)}”` : "");
+const email = (p: Payload) => str(p.email) ?? "a client";
+/** What a publish changed, from the counts its event carries: " (2 new, 1 updated, 1 removed)", or nothing without them. */
+const published = (p: Payload) => {
+  const said = (
+    [
+      [num(p.added), "new"],
+      [num(p.updated), "updated"],
+      [num(p.removed), "removed"],
+    ] as const
+  )
+    .filter(([n]) => n != null && n > 0)
+    .map(([n, word]) => `${n} ${word}`);
+  return said.length > 0 ? ` (${said.join(", ")})` : "";
+};
 const person = (p: Payload, names: NameOf, key: string, fallback: string) => {
   const id = num(p[key]);
   return (id != null && names(id)) || fallback;
@@ -95,6 +109,36 @@ const WORDS: Record<string, Words> = {
   project_completed: { icon: "checkCircle", text: (e) => `marked ${project(e)} as completed` },
   project_archived: { icon: "archive", text: (e) => `archived ${project(e)}` },
   project_reopened: { icon: "refresh", text: (e) => `reopened ${project(e)}` },
+  // the client portal (the payload names the client's address; accepting has no staff actor)
+  portal_client_invited: {
+    icon: "send",
+    text: (e, p) => `invited ${email(p)} to follow ${project(e)} in the client portal`,
+  },
+  portal_invitation_resent: {
+    icon: "send",
+    text: (e, p) => `sent ${email(p)} a new client portal invitation for ${project(e)}`,
+  },
+  portal_invitation_revoked: {
+    icon: "x",
+    text: (e, p) => `cancelled ${email(p)}'s client portal invitation for ${project(e)}`,
+  },
+  portal_invitation_accepted: {
+    icon: "checkCircle",
+    text: (e, p) =>
+      `${email(p)} accepted the invitation and can now follow ${project(e)} in the client portal`,
+  },
+  portal_access_granted: {
+    icon: "userPlus",
+    text: (e, p) => `gave ${email(p)} access to ${project(e)} in the client portal`,
+  },
+  portal_access_revoked: {
+    icon: "x",
+    text: (e, p) => `ended ${email(p)}'s client portal access to ${project(e)}`,
+  },
+  portal_published: {
+    icon: "send",
+    text: (e, p) => `published the client portal of ${project(e)}${published(p)}`,
+  },
   progress_set: {
     icon: "trendUp",
     text: (e) =>
