@@ -16,7 +16,7 @@ export function requestErrorMessage(error: unknown): string {
 
 export function signInErrorMessage(error: unknown): string {
   if (toApiError(error).code === "invalid_credentials") {
-    return "That email and password don't match an account.";
+    return "That email and password don't match an account. After several wrong attempts, sign-in pauses for a few minutes.";
   }
   return requestErrorMessage(error);
 }
