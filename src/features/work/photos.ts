@@ -118,19 +118,29 @@ export async function uploadMedia(media: PickedMedia): Promise<FileInfo> {
   return data;
 }
 
+/** The longest side to ask the API for (`?size=`); it serves a WebP copy at the next size up, as the web does. */
+export const PHOTO_SIZE = { avatar: 160, thumb: 480 } as const;
+
 /**
  * A protected file as an image source: downloaded with the signed-in person's token in a header (never in the
- * address) and cached on disk by its address, which carries only the file id.
+ * address) and cached on disk by its address, which carries only the file id and the size. Without a size it
+ * is the full file, for a photo opened full screen; a video never takes a size.
  */
-export function fileSource(fileId: number): AvatarPhoto {
+export function fileSource(fileId: number, size?: number): AvatarPhoto {
   const token = tokenManager.getAccessToken();
   return {
-    uri: `${env.apiUrl}/api/files/${fileId}`,
+    uri: `${env.apiUrl}/api/files/${fileId}${size ? `?size=${size}` : ""}`,
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   };
 }
 
+/** A small copy of a photo, for avatars. */
+export const avatarSource = (fileId: number) => fileSource(fileId, PHOTO_SIZE.avatar);
+
+/** A medium copy of a photo, for thumbnails in a chat or a work entry. */
+export const thumbSource = (fileId: number) => fileSource(fileId, PHOTO_SIZE.thumb);
+
 /** A person's uploaded photo as an avatar source, or null for the generated face. */
 export function photoOf(photoFileId: number | null | undefined): AvatarPhoto | null {
-  return photoFileId ? fileSource(photoFileId) : null;
+  return photoFileId ? avatarSource(photoFileId) : null;
 }

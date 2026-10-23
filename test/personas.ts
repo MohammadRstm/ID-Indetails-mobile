@@ -76,6 +76,7 @@ export type PersonaName =
   | "executionAdmin"
   | "designEmployee"
   | "executionEmployee"
+  | "websiteAdmin"
   | "customGrants";
 
 function user(
@@ -171,6 +172,8 @@ export const personas: Record<PersonaName, CurrentUser> = {
     ],
     "Site engineer",
   ),
+  // The website's staff: admins with the website's permissions and nothing else.
+  websiteAdmin: user(7, "Lea", "admin", "website", WEBSITE, "Web editor"),
   // A Design employee who also records materials on sites (which opens Execution) and may no longer schedule meetings.
   customGrants: {
     ...withPermissions(designEmployee, {

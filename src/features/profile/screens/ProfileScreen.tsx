@@ -3,7 +3,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { toApiError } from "@/api/errors";
 import { useCurrentUser } from "@/auth/session";
-import { fileSource, pickMedia, uploadMedia } from "@/features/work/photos";
+import { photoOf, pickMedia, uploadMedia } from "@/features/work/photos";
 import { fmtDateY } from "@/format/time";
 import { spacing } from "@/theme/tokens";
 import {
@@ -28,7 +28,11 @@ const ROLE: Record<string, string> = {
   admin: "Admin",
   employee: "Employee",
 };
-const AREA: Record<string, string> = { design: "Design", execution: "Execution" };
+const AREA: Record<string, string> = {
+  design: "Design",
+  execution: "Execution",
+  website: "Website",
+};
 
 /** My profile: my photo (changeable), my details, and what I'm allowed to do and why. */
 export function ProfileScreen() {
@@ -93,7 +97,7 @@ export function ProfileScreen() {
       <Section>
         <Card>
           <View style={styles.head}>
-            <Avatar name={name} size={72} photo={shownPhoto ? fileSource(shownPhoto) : null} />
+            <Avatar name={name} size={72} photo={photoOf(shownPhoto)} />
             <View style={styles.headText}>
               <Text variant="heading">{name}</Text>
               {me.position ? (

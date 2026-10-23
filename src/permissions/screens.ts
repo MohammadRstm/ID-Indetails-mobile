@@ -210,10 +210,12 @@ export function canOpen(perms: Permissions, key: ScreenKey): boolean {
   return (screens[key] as Screen).rule(perms);
 }
 
-export type Persona = "design_employee" | "execution_employee" | "admin" | "super_admin";
+export type Persona =
+  "design_employee" | "execution_employee" | "admin" | "super_admin" | "website_staff";
 
 /** Which kind of person this is, for their tabs and their Today. Employees go by their home domain. */
 export function persona(perms: Permissions): Persona {
+  if (perms.isWebsiteStaff) return "website_staff";
   if (perms.isSuperAdmin) return "super_admin";
   if (perms.isAdmin) return "admin";
   const domain = perms.homeDomain ?? perms.visibleDomains[0] ?? "design";
@@ -240,6 +242,7 @@ const TABS_OF: Record<Persona, TabKey[]> = {
   execution_employee: ["today", "sites", "messages", "alerts", "more"],
   admin: ["today", "projects", "messages", "alerts", "more"],
   super_admin: ["today", "projects", "messages", "alerts", "more"],
+  website_staff: ["today", "messages", "alerts", "more"],
 };
 
 /** This person's tabs: their persona's, less any whose screen they can't open. */

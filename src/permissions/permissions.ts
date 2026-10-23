@@ -1,5 +1,5 @@
 // Ported from the web client: src/app/permissions/permissions.ts (see docs/ported-from-web.md).
-// accessLabel, a sidebar detail, isn't ported.
+// accessLabel (a sidebar detail) and hasWebsiteArea (the phone has no website screens) aren't ported.
 import type { CurrentUser } from "@/api/types";
 import { P, type PermissionCode } from "./codes";
 
@@ -26,6 +26,8 @@ export type Permissions = {
   homeDomain: Domain | null;
   /** The domains they may enter: their own, plus any a domain-limited grant opens. */
   visibleDomains: Domain[];
+  /** Website staff: the website is their home, and they belong to no business. */
+  isWebsiteStaff: boolean;
   has(code: PermissionCode): boolean;
   hasAny(...codes: PermissionCode[]): boolean;
   hasAll(...codes: PermissionCode[]): boolean;
@@ -51,6 +53,7 @@ export function permissionsOf(
     role,
     homeDomain: user.domain === "design" || user.domain === "execution" ? user.domain : null,
     visibleDomains: visible,
+    isWebsiteStaff: user.domain === "website",
     has,
     hasAny: (...codes) => codes.some(has),
     hasAll: (...codes) => codes.every(has),

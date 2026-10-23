@@ -7,7 +7,7 @@ import { toApiError } from "@/api/errors";
 import type { Message } from "@/api/types";
 import { useCurrentUser } from "@/auth/session";
 import { takeProtonDraft } from "@/features/proton/drafts";
-import { fileSource, photoOf, pickMedia, uploadMedia } from "@/features/work/photos";
+import { photoOf, pickMedia, thumbSource, uploadMedia } from "@/features/work/photos";
 import { spacing } from "@/theme/tokens";
 import { EmptyState, InlineError, Screen, ScreenHeader, Skeleton } from "@/ui";
 import { useMarkChatRead, useSendMessage, useTeamMembers, useThread, type Chat } from "../api";
@@ -204,7 +204,7 @@ export function ChatThread({ chat, title, subtitle }: ChatThreadProps) {
                 <OutgoingBubble
                   outgoing={item.outgoing}
                   mine
-                  imageSource={fileSource}
+                  imageSource={thumbSource}
                   onRetry={() => item.outgoing && void deliver(item.outgoing)}
                 />
               ) : item.message ? (
@@ -214,7 +214,7 @@ export function ChatThread({ chat, title, subtitle }: ChatThreadProps) {
                   showSender={!!item.showSender}
                   senderPhoto={photoOf(item.message.sender.photoFileId)}
                   mentionNames={mentionNames}
-                  imageSource={fileSource}
+                  imageSource={thumbSource}
                 />
               ) : null
             }

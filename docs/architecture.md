@@ -120,6 +120,7 @@ A local lock, not sign-in (`src/auth/lock/`). The server session is the refresh 
 
 - The person and their permission codes come from `/auth/me` (and every refresh), never from the token's claims.
 - `permissionsOf(user)` (`src/permissions/permissions.ts`, ported from the web) answers `has`, `canSeeDomain`, `isAdmin` and the rest.
+- **Website staff** (`domain` "website": admins holding only the website codes) belong to no business, so `permissionsOf` gives them `isWebsiteStaff` and no home domain, and `persona()` is `website_staff`. The phone has no website screens: their Today says the website is managed on the web and opens its Website area in the browser (`EXPO_PUBLIC_WEB_URL` + `/website/projects`). Their other tabs (Messages, Alerts, More) call no Design or Execution endpoints. Super admins, and Design or Execution people granted a website code, are unaffected.
 - **One screen table**, `src/permissions/screens.ts`, lists every route with its rule, its title and its place in More. The tab bar, the route guard, More, deep links and push targets all read it, so they can't disagree.
 - Smart components check permissions and pass booleans down. Hiding something is a convenience: the API checks every request again.
 
