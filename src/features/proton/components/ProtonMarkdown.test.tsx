@@ -3,7 +3,8 @@ import { renderWithProviders } from "@test/render";
 import { Bubble } from "./Bubble";
 import { ProtonMarkdown } from "./ProtonMarkdown";
 
-const ANSWER = "**Design**\n- **Projects:** 7 active\n- Hours are *down*\n\nSee `P-12` and project_id.";
+const ANSWER =
+  "**Design**\n- **Projects:** 7 active\n- Hours are *down*\n\nSee `P-12` and project_id.";
 
 describe("ProtonMarkdown", () => {
   it("draws bold, lists, italic and code without their markers", async () => {
