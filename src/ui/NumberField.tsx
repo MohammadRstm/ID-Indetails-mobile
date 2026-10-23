@@ -23,9 +23,15 @@ type NumberFieldProps = {
 
 const display = (value: number | null) => (value == null ? "" : String(value));
 
-/** Reads what was typed: null when empty or not a number yet. Commas are thousands separators. */
+/**
+ * Reads what was typed: null when empty or not a number yet. A phone set to a region that writes 12,5 types a comma
+ * from the decimal keypad, so a lone comma is the decimal mark; beside a dot, or several, commas group thousands.
+ */
 export function parseNumber(text: string, decimals?: number): number | null {
-  const cleaned = text.replace(/,/g, "").trim();
+  const trimmed = text.trim();
+  const commas = trimmed.split(",").length - 1;
+  const decimalComma = decimals !== 0 && commas === 1 && !trimmed.includes(".");
+  const cleaned = decimalComma ? trimmed.replace(",", ".") : trimmed.replace(/,/g, "");
   if (!cleaned || !/^-?\d*\.?\d*$/.test(cleaned) || cleaned === "-" || cleaned === ".") return null;
   const value = Number(cleaned);
   if (!Number.isFinite(value)) return null;
