@@ -211,11 +211,7 @@ export function canOpen(perms: Permissions, key: ScreenKey): boolean {
 }
 
 export type Persona =
-  | "design_employee"
-  | "execution_employee"
-  | "admin"
-  | "super_admin"
-  | "website_staff";
+  "design_employee" | "execution_employee" | "admin" | "super_admin" | "website_staff";
 
 /** Which kind of person this is, for their tabs and their Today. Employees go by their home domain. */
 export function persona(perms: Permissions): Persona {
