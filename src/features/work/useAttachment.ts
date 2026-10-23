@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toApiError } from "@/api/errors";
 import type { FileInfo } from "@/api/types";
-import { fileSource, pickMedia, uploadMedia } from "./photos";
+import { pickMedia, thumbSource, uploadMedia } from "./photos";
 
 const DENIED: Record<"camera" | "library", string> = {
   camera: "The camera isn't allowed. Turn it on for ID InDetails in your phone's settings.",
@@ -36,7 +36,7 @@ export function useAttachment(initial: FileInfo | null) {
     file,
     uploading,
     error,
-    photo: file ? fileSource(file.id) : null,
+    photo: file ? thumbSource(file.id) : null,
     pick,
     remove: () => setFile(null),
   };

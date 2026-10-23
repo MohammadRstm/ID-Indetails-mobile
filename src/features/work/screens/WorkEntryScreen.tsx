@@ -24,7 +24,7 @@ import { useDeleteEntry, useRestoreEntry, useWorkEntry } from "../api";
 import { EntryRow } from "../components/EntryRow";
 import { requestLogWork } from "../logWorkRequest";
 import { workErrorText } from "../model";
-import { fileSource } from "../photos";
+import { thumbSource } from "../photos";
 
 export type WorkEntryScreenProps = {
   entryId: number;
@@ -102,7 +102,7 @@ export function WorkEntryScreen({ entryId }: WorkEntryScreenProps) {
           {entry.description ? <Text>{entry.description}</Text> : null}
           {entry.attachment ? (
             <Image
-              source={fileSource(entry.attachment.id)}
+              source={thumbSource(entry.attachment.id)}
               cachePolicy="disk"
               contentFit="cover"
               style={styles.photo}
