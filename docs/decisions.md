@@ -20,3 +20,5 @@ Where the approval didn't answer a question, the plan's proposed default applies
 | 12 | Theme | Follow the phone's light/dark setting by default, with Light / Dark / System in the app (**default**) |
 | 13 | Material receipts | Not built (see 2) |
 | 14 | Timer on sign-out | Keep a stopped but not-yet-logged timer run for that person, so their time isn't lost (decided 8 Oct 2026; the plan's "clear the timer" no longer applies to unlogged runs) |
+| 15 | Log work's "Use a timer instead" while a timer runs | Not offered: the running timer is stopped first, on Today, so its time is kept (decided 23 Oct 2026; the web replaces the running timer) |
+| 16 | A comma typed in a number field | A lone comma is the decimal mark, as the decimal keypad types it in regions that write 12,5; beside a dot, or several, commas group thousands. Whole-number fields read commas as thousands (decided 23 Oct 2026; the web drops every comma) |
