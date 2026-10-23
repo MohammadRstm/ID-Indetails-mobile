@@ -17,7 +17,8 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/auth/screens/ForgotPasswordScreen.tsx` | `src/auth/ForgotPasswordPage.tsx` | Same neutral answer; the link opens the website |
 | `src/auth/screens/ChangePasswordScreen.tsx` | `src/auth/ChangePasswordPage.tsx` | Same rules and words; uses the mobile endpoint, which keeps the phone's session |
 | `src/auth/components/AuthLayout.tsx` | `src/auth/AuthLayout.tsx` | The same card: mark, product name, company name, heading |
-| `src/auth/components/BrandMark.tsx` | `src/shared/components/Identity/Logo.tsx` | Same mark and logo URL, drawn with react-native-svg and expo-image |
+| `src/auth/components/BrandMark.tsx` | `src/shared/components/Identity/Logo.tsx` | Same company mark (ink tile, surface-coloured mark) and logo URL, drawn with react-native-svg and expo-image |
+| `src/auth/components/companyMark.ts` | `src/shared/components/Identity/companyMark.ts` | Ported unchanged |
 | `src/auth/brandingApi.ts` | `src/shared/components/Identity/useBranding.ts` | Same query and key |
 | `assets/fonts/*.ttf` | `@fontsource-variable/archivo`, `@fontsource-variable/martian-mono` (the web's `src/styles/fonts.css`) | Static instances at the widths the web sets with `font-stretch`, made by `scripts/fonts.py` (Latin and Latin Extended) |
 | `src/api/types.ts` | `src/api/types.ts` | More named aliases |
