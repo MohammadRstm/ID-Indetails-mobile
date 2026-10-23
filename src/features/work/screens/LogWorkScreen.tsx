@@ -5,7 +5,7 @@ import type { WorkEntry } from "@/api/types";
 import { useCurrentUser } from "@/auth/session";
 import { FilledNote } from "@/features/proton/components/FilledNote";
 import { startTimer } from "@/features/timer/actions";
-import { removeRun } from "@/features/timer/store";
+import { removeRun, useTimerState } from "@/features/timer/store";
 import { companyToday, dayKey, fmtDayDate, fmtDur, fmtRange, minutesOfDay } from "@/format/time";
 import { P } from "@/permissions/codes";
 import { usePermissions } from "@/permissions/usePermissions";
@@ -134,6 +134,7 @@ function LogWorkForm({
 }: FormProps) {
   const me = useCurrentUser();
   const perms = usePermissions();
+  const timer = useTimerState(me.id);
   const edit = request.edit ?? null;
   const choices = loggableProjects(projects, edit?.project.id);
   const [initial] = useState(() => firstSlot(request, firstDay, today, firstDayEntries, dayStart));
@@ -252,8 +253,13 @@ function LogWorkForm({
     close();
   }
 
+  // Starting a timer replaces the running one, and its time with it: the running one is stopped first, on Today.
   const canUseTimer =
-    !edit && settings.timerEnabled && perms.has(P.WORK_ENTRY_CREATE) && !!project?.acceptsWork;
+    !edit &&
+    !timer.running &&
+    settings.timerEnabled &&
+    perms.has(P.WORK_ENTRY_CREATE) &&
+    !!project?.acceptsWork;
 
   return (
     <LogWorkView

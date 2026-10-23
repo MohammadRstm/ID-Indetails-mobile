@@ -1,6 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
+import Storage from "expo-sqlite/kv-store";
 import { http, HttpResponse } from "msw";
+import { resetTimerCache, saveRunning } from "@/features/timer/store";
 import { addDays, companyToday } from "@/format/time";
 import { api } from "@test/handlers";
 import { renderWithProviders } from "@test/render";
@@ -125,6 +127,33 @@ it("says so when the overlap is with another entry", async () => {
   await fireEvent.press(await screen.findByRole("button", { name: "Log 1h 00m" }));
   expect(await screen.findByText("This overlaps another of your entries.")).toBeTruthy();
   expect(router.back).not.toHaveBeenCalled();
+});
+
+describe("using a timer instead", () => {
+  afterEach(async () => {
+    await Storage.clear();
+    resetTimerCache();
+  });
+
+  it("is offered when no timer is running", async () => {
+    serveDay();
+    await renderWithProviders(<LogWorkScreen />);
+    expect(await screen.findByRole("button", { name: "Use a timer instead" })).toBeTruthy();
+  });
+
+  it("isn't offered while a timer runs, so starting one can't throw its time away", async () => {
+    serveDay();
+    saveRunning({
+      userId: 4,
+      projectId: 1,
+      projectTitle: "Villa Haddad",
+      description: "Site visit",
+      startedAt: "2026-10-08T06:00:00Z",
+    });
+    await renderWithProviders(<LogWorkScreen />);
+    expect(await screen.findByRole("button", { name: "Log 1h 00m" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Use a timer instead" })).toBeNull();
+  });
 });
 
 it("says what Proton filled in, and logs nothing until the person saves", async () => {
