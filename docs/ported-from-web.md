@@ -2,7 +2,7 @@
 
 The web client can't be changed, so there is no shared package: these modules were copied from it. When the web changes one of them, compare and copy the change here.
 
-Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026). The Proton card modules and the generated types are as of its `main` at `a6ab622` (13 Oct 2026). The permission codes, the activity words and the notification words are as of its `main` at `cf838e8` (16 Oct 2026).
+Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton-Navigation` branch (8 Oct 2026). The Proton card modules and the generated types are as of its `main` at `a6ab622` (13 Oct 2026). The permission codes (since `2e60592`, 23 Oct 2026), the activity words and the notification words are as of its `main` at `cf838e8` (16 Oct 2026).
 
 | App module | Web source | How it differs |
 |---|---|---|
@@ -21,7 +21,7 @@ Web paths are in `Ident-Internal-Management-System-client`, as of its `MR-Proton
 | `src/auth/brandingApi.ts` | `src/shared/components/Identity/useBranding.ts` | Same query and key |
 | `assets/fonts/*.ttf` | `@fontsource-variable/archivo`, `@fontsource-variable/martian-mono` (the web's `src/styles/fonts.css`) | Static instances at the widths the web sets with `font-stretch`, made by `scripts/fonts.py` (Latin and Latin Extended) |
 | `src/api/types.ts` | `src/api/types.ts` | More named aliases |
-| `src/permissions/codes.ts` | `src/app/permissions/codes.ts` | Unchanged; 57 codes, as of web `main` at `cf838e8` |
+| `src/permissions/codes.ts` | `src/app/permissions/codes.ts` | Unchanged; 60 codes (the three website ones included), as of web `main` at `2e60592` (23 Oct 2026) |
 | `src/permissions/permissions.ts` | `src/app/permissions/permissions.ts` | `accessLabel` isn't ported |
 | `src/permissions/screens.ts` | `src/app/routing/routeTable.tsx` | The idea and the rules, rewritten for the phone's routes (one table, no domain in the path) |
 | `src/navigation/targets.ts` (`routeForProtonCommand`, `routeForProtonSurface`), `src/features/proton/runCommands.ts` | `src/domains/shared/proton/uiCommands.ts` (`stepOf`, `useRunProtonCommands`), `surfaces.ts` | Same rules (never an address, the domain and permissions checked, at most 3 commands in order, each different result line once), mapped onto the phone's screens: the person's own pages, settings, log work, new meeting, chats, record payment; reports, company expenses and every other form stay on the web. `open_project` opens requirements, materials and labour on their own screens, and passes `financials`, `overview`, `contributors` or `meetings` on as the project screen's `section` to scroll to (analytics and the timeline stay on the web, so the project opens at the top). A theme switch changes the app theme; message sounds are ignored. What a screen needs on arrival (log-work values, a chat draft) is left before it opens |

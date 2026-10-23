@@ -26,6 +26,8 @@ const COMPANY_ONLY: PermissionCode[] = [
   P.EMPLOYEE_CHANGE_EMAIL,
   P.PROTON_BUDGET_MANAGE,
 ];
+/** The website's own: its staff hold them, and anyone else only when granted. */
+const WEBSITE: PermissionCode[] = [P.WEBSITE_VIEW, P.WEBSITE_MANAGE, P.WEBSITE_ANALYTICS_VIEW];
 const EXECUTION_ONLY: PermissionCode[] = [
   P.PROJECT_PRICING_MANAGE,
   P.STATEMENT_CREATE,
@@ -99,7 +101,7 @@ function user(
     mustChangePassword: false,
     permissions: [...permissions].sort(),
     isJoker: false,
-    visibleDomains: domain ? [domain] : ["design", "execution"],
+    visibleDomains: domain ? [domain] : ["design", "execution", "website"],
   };
 }
 
@@ -142,7 +144,7 @@ export const personas: Record<PersonaName, CurrentUser> = {
     "Nadia",
     "admin",
     "design",
-    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, EXECUTION_ONLY, OWN_WORK, CLIENT_PORTAL),
+    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, EXECUTION_ONLY, OWN_WORK, CLIENT_PORTAL, WEBSITE),
     "Design director",
   ),
   executionAdmin: user(
@@ -150,7 +152,7 @@ export const personas: Record<PersonaName, CurrentUser> = {
     "Karim",
     "admin",
     "execution",
-    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, DESIGN_ONLY),
+    without(ALL, COMPANY_ONLY, SUPER_ADMIN_ONLY, DESIGN_ONLY, WEBSITE),
     "Operations manager",
   ),
   designEmployee,
