@@ -10,6 +10,7 @@ export const companySettings: CompanySettings = {
   name: "ID InDetails",
   address: null,
   website: null,
+  contactEmail: null,
   logoFileId: null,
   defaultCurrency: "USD",
   isSetUp: true,
