@@ -5,9 +5,9 @@ import { permissionsOf } from "./permissions";
 const of = (name: PersonaName) => permissionsOf(personas[name]);
 
 describe("permissionsOf", () => {
-  it("has the 57 codes of the API", () => {
-    expect(Object.values(P)).toHaveLength(57);
-    expect(new Set(Object.values(P)).size).toBe(57);
+  it("has the 60 codes of the API", () => {
+    expect(Object.values(P)).toHaveLength(60);
+    expect(new Set(Object.values(P)).size).toBe(60);
   });
 
   it.each([

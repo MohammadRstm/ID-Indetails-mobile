@@ -185,7 +185,7 @@ Phase 1a creates them with their final exports and a working first version. Phas
 | `src/api/queryClient.ts` | `queryClient` (AppState focus, NetInfo online, the web's retry rules) |
 | `src/auth/session.tsx` | `SessionProvider`, `useSession(): { status: "loading" \| "signedOut" \| "signedIn"; user: CurrentUser \| null; signIn(email, password): Promise<void>; signOut(): Promise<void> }`, `useCurrentUser(): CurrentUser` |
 | `src/auth/tokenManager.ts` | `tokenManager.getAccessToken()`, `tokenManager.refresh()`, `tokenManager.onSessionEnded(listener)` |
-| `src/permissions/codes.ts` | `P` (the 54 codes, ported from the web) |
+| `src/permissions/codes.ts` | `P` (the 60 codes, ported from the web) |
 | `src/permissions/permissions.ts` | `permissionsOf(user)` → `{ has, hasAny, hasAll, canSeeDomain, isAdmin, isSuperAdmin, homeDomain, visibleDomains, hasCompanyArea }` |
 | `src/permissions/usePermissions.ts` | `usePermissions()` |
 | `src/permissions/screens.ts` | `screens` (every route key with its rule), `canOpen(perms, key)`, `tabsFor(perms)`, `persona(perms): "design_employee" \| "execution_employee" \| "admin" \| "super_admin"` |

@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 import { useTheme } from "@/theme/ThemeProvider";
 import { radii, spacing } from "@/theme/tokens";
 import { Text } from "@/ui";
+import { ProtonMarkdown } from "./ProtonMarkdown";
 
 type BubbleProps = {
   from: "you" | "proton" | "error";
@@ -26,7 +27,11 @@ export function Bubble({ from, text, children, onLongPress, longPressLabel }: Bu
   ];
   const body = (
     <>
-      <Text tone={from === "error" ? "danger" : "default"}>{text}</Text>
+      {from === "proton" ? (
+        <ProtonMarkdown text={text} />
+      ) : (
+        <Text tone={from === "error" ? "danger" : "default"}>{text}</Text>
+      )}
       {children}
     </>
   );

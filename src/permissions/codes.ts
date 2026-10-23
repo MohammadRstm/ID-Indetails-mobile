@@ -62,6 +62,9 @@ export const P = {
   HOURS_EXCUSE: "hours:excuse",
   PROTON_USE: "proton:use",
   PROTON_BUDGET_MANAGE: "proton_budget:manage",
+  WEBSITE_VIEW: "website:view",
+  WEBSITE_MANAGE: "website:manage",
+  WEBSITE_ANALYTICS_VIEW: "website_analytics:view",
 } as const;
 
 export type PermissionCode = (typeof P)[keyof typeof P];
