@@ -7,10 +7,18 @@ import { respondToNotification, type ResponseContext } from "./respond";
 
 jest.mock("./actions", () => ({ handleNotificationAction: jest.fn(async () => false) }));
 
-const tap = (data: unknown, actionIdentifier = "expo.modules.notifications.actions.DEFAULT") =>
-  ({ actionIdentifier, notification: { request: { content: { data } } } }) as unknown as Pick<
+const tap = (
+  data: unknown,
+  actionIdentifier = "expo.modules.notifications.actions.DEFAULT",
+  userText?: string,
+) =>
+  ({
+    actionIdentifier,
+    userText,
+    notification: { request: { content: { data } } },
+  }) as unknown as Pick<
     Notifications.NotificationResponse,
-    "actionIdentifier" | "notification"
+    "actionIdentifier" | "notification" | "userText"
   >;
 
 function context(
@@ -76,8 +84,26 @@ describe("tapping a push", () => {
     expect(handleNotificationAction).toHaveBeenCalledWith(
       "done",
       expect.objectContaining({ forUserId: 4 }),
+      undefined,
     );
     expect(ctx.navigate).not.toHaveBeenCalled();
+  });
+
+  it("hands the text typed into Reply to the action", async () => {
+    const ctx = context();
+    await respondToNotification(
+      tap(
+        { forUserId: 4, kind: "message", target: { type: "conversation", userId: 2 } },
+        "reply",
+        "On my way",
+      ),
+      ctx,
+    );
+    expect(handleNotificationAction).toHaveBeenCalledWith(
+      "reply",
+      expect.objectContaining({ forUserId: 4 }),
+      "On my way",
+    );
   });
 
   it("ignores a malformed payload", async () => {
