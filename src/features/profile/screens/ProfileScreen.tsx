@@ -28,7 +28,11 @@ const ROLE: Record<string, string> = {
   admin: "Admin",
   employee: "Employee",
 };
-const AREA: Record<string, string> = { design: "Design", execution: "Execution" };
+const AREA: Record<string, string> = {
+  design: "Design",
+  execution: "Execution",
+  website: "Website",
+};
 
 /** My profile: my photo (changeable), my details, and what I'm allowed to do and why. */
 export function ProfileScreen() {

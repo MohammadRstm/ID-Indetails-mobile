@@ -32,6 +32,20 @@ describe("permissionsOf", () => {
     },
   );
 
+  it("knows website staff, and no one else", () => {
+    expect(of("websiteAdmin")).toMatchObject({
+      role: "admin",
+      homeDomain: null,
+      visibleDomains: [],
+      isWebsiteStaff: true,
+    });
+    expect(of("websiteAdmin").has(P.PROJECT_VIEW)).toBe(false);
+    expect(of("websiteAdmin").has(P.WEBSITE_MANAGE)).toBe(true);
+    for (const name of ["superAdmin", "designAdmin", "designEmployee", "customGrants"] as const) {
+      expect(of(name).isWebsiteStaff).toBe(false);
+    }
+  });
+
   it("answers has, hasAny and hasAll from the effective codes", () => {
     const p = of("designEmployee");
     expect(p.has(P.WORK_ENTRY_CREATE)).toBe(true);

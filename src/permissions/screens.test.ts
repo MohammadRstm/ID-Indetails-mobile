@@ -96,6 +96,7 @@ describe("persona", () => {
     ["designEmployee", "design_employee"],
     ["executionEmployee", "execution_employee"],
     ["customGrants", "design_employee"],
+    ["websiteAdmin", "website_staff"],
   ] as const)("%s is a %s", (name, kind) => {
     expect(persona(permissionsOf(personas[name]))).toBe(kind);
   });
@@ -111,6 +112,7 @@ describe("tabsFor", () => {
     expect(tabs("executionAdmin")).toEqual(["Today", "Projects", "Messages", "Alerts", "More"]);
     expect(tabs("superAdmin")).toEqual(["Company", "Projects", "Messages", "Alerts", "More"]);
     expect(tabs("customGrants")).toEqual(["Today", "Work", "Messages", "Alerts", "More"]);
+    expect(tabs("websiteAdmin")).toEqual(["Today", "Messages", "Alerts", "More"]);
   });
 
   it("drops a tab whose screen the person can no longer open", () => {

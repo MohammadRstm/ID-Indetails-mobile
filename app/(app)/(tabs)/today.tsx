@@ -2,6 +2,7 @@ import { AdminTodayScreen } from "@/features/today/admin/screens/AdminTodayScree
 import { CompanyTodayScreen } from "@/features/today/company/screens/CompanyTodayScreen";
 import { DesignTodayScreen } from "@/features/today/design/screens/DesignTodayScreen";
 import { ExecutionTodayScreen } from "@/features/today/execution/screens/ExecutionTodayScreen";
+import { WebsiteTodayScreen } from "@/features/today/website/screens/WebsiteTodayScreen";
 import { persona } from "@/permissions/screens";
 import { usePermissions } from "@/permissions/usePermissions";
 
@@ -16,5 +17,7 @@ export default function TodayRoute() {
       return <ExecutionTodayScreen />;
     case "design_employee":
       return <DesignTodayScreen />;
+    case "website_staff":
+      return <WebsiteTodayScreen />;
   }
 }

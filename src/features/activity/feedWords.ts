@@ -4,7 +4,11 @@ import { money } from "@/format/money";
 import { fmtDate, fmtDayDate, fmtDur, fmtH, fmtMonthY, fmtTime } from "@/format/time";
 import type { IconName } from "@/ui/icons";
 
-const DOMAIN_LABEL: Record<string, string> = { design: "Design", execution: "Execution" };
+const DOMAIN_LABEL: Record<string, string> = {
+  design: "Design",
+  execution: "Execution",
+  website: "Website",
+};
 
 export type FeedEvent = Schemas["ActivityItemResponse"];
 

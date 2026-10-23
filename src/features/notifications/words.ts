@@ -46,7 +46,11 @@ const ROLE: Record<string, string> = {
   admin: "admin",
   employee: "employee",
 };
-const AREA: Record<string, string> = { design: "Design", execution: "Execution" };
+const AREA: Record<string, string> = {
+  design: "Design",
+  execution: "Execution",
+  website: "Website",
+};
 
 /** The words, icon and target of a notification, in the web's voice. Amounts are never in one. */
 export function describe(note: Notification, reader: Reader): NotificationView {
