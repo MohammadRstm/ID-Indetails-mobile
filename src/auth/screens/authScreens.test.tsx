@@ -82,7 +82,11 @@ describe("SignInScreen", () => {
       ),
     );
     await signIn();
-    expect(await screen.findByText("That email and password don't match an account.")).toBeTruthy();
+    expect(
+      await screen.findByText(
+        "That email and password don't match an account. After several wrong attempts, sign-in pauses for a few minutes.",
+      ),
+    ).toBeTruthy();
   });
 
   it("says why when a super admin has suspended the sign-in", async () => {

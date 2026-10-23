@@ -227,7 +227,7 @@ The web already adapts, which shows the intended phone patterns:
 
 - **Roles:** `super_admin`, `admin`, `employee`.
 - **Domains:** `design`, `execution`. Admins and employees have one home domain. Super admins have none and see both.
-- **Permissions:** 54 codes. Role defaults are in the API's `Constants/PermissionCatalog.cs`.
+- **Permissions:** 57 codes. Role defaults are in the API's `Constants/PermissionCatalog.cs`.
 
 ### Default permissions per role
 
@@ -244,7 +244,7 @@ Permissions any domain can hold:
 | `client:view`, `client:create`, `client:manage` | ✓ | ✓ | – |
 | `employee:view`, `employee:manage`, `team:manage` | ✓ | ✓ | – |
 | `activity:view`, `report:view`, `domain_settings:manage` | ✓ | ✓ | – |
-| `proton:use` | ✓ | ✓ | – |
+| `proton:use` | ✓ | ✓ | ✓ |
 | **Money:** `financial:view`, `invoice:create`, `invoice:send`, `invoice:void`, `payment:record`, `payment:void`, `billing_settings:manage`, `expense:manage` | ✓ | – | – |
 | **Hiring and pay:** `employee:invite`, `employee:pay_manage` | ✓ | – | – |
 | **Company:** `company:view`, `overhead:manage`, `overhead_category:manage`, `salary:view`, `company_settings:manage`, `working_time:manage`, `schedule:manage`, `hours:excuse`, `employee:invite_super_admin`, `employee:change_email`, `permission:manage`, `session:manage`, `exchange_rate:manage`, `proton_budget:manage` | ✓ | – | – |
@@ -258,8 +258,10 @@ Permissions limited to one domain (D = Design, E = Execution):
 | `material:create`, `labour_report:create` | E | ✓ | – | ✓ | – | ✓ |
 | `material:manage`, `labour_report:manage` | E | ✓ | – | ✓ | – | – |
 | `project:pricing_manage`, `statement:create`, `statement:send` | E | ✓ | – | – | – | – |
+| `client_access:manage`, `project_files:manage` | D | ✓ | ✓ | – | – | – |
+| `client_portal:manage` | D | ✓ | – | – | – | – |
 
-Totals: super admin 52, Design admin 21, Execution admin 23, each employee 6.
+Totals: super admin 55, Design admin 23, Execution admin 23, each employee 7.
 
 Admins and super admins log no hours: they are paid a fixed salary. Money and hiring became super-admin-only on 7 Oct 2026 (migration `AdminsSeeNoMoney`); it is a default, so an individual admin can still be granted them.
 
@@ -383,12 +385,12 @@ Sent over SMTP: invitations, temporary super-admin passwords, password resets, s
 
 ## 8. Proton
 
-- Needs `proton:use` (admins and super admins by default). 10 questions a minute per user, plus a monthly per-user and company budget.
+- Needs `proton:use` (every role by default, employees included). 10 questions a minute per user, plus a monthly per-user and company budget.
 - `POST /api/proton/messages` `{conversationId, text, page, choice}` → `{conversationId, reply, refs, sources, choices, pendingAction, uiCommands, usage, limited}`. **Not streamed**: one answer, up to 55 seconds.
 - Proposed changes come back as `pendingAction` cards, confirmed or cancelled with `POST /api/proton/actions/{id}/confirm|cancel`.
 - **Cards since 13 Oct 2026:** a reply carries up to 3 cards in `pendingActions` (`pendingAction` is the last). `preview.confirm` is `standard` (one Confirm), `two_step` (Review, then Confirm) or `typed` (the phrase is typed and sent as `typed`; a wrong one is `422 proton_phrase_mismatch`). `GET /api/proton/actions` gives the status of each card. The phone's rules are in `src/features/proton/cards.ts`.
 - `GET /api/proton/usage` for "N of M questions left this month". Chats are saved by the API: `GET /api/proton/conversations` (list, `search`, `page`), `GET`/`PATCH`/`DELETE /api/proton/conversations/{id}`. **`DELETE` deletes the saved chat for good**; "New conversation" on the phone only leaves the open chat and never calls it.
-- Conversations live in the API's memory (30 minutes idle, 4 hours or 20 questions at most).
+- Each answered question is saved in the chat history. The live conversation the model continues from is held in the API's memory (30 minutes idle, 4 hours or 20 questions at most), and a saved chat then carries on from a recap.
 - **Navigation commands use names, not web addresses:** `open_project`, `open_client`, `open_person`, `open_page` (`dashboard`, `projects`, `clients`, `people`, `financials`, `meetings`, `activity`, `reports`, `company_overview`, `company_expenses`) and `refresh`, with optional `section` and `tab`. The app can map them straight onto its own screens.
 
 ## 9. API conventions
