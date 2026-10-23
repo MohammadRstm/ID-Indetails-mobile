@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { AccessibilityInfo } from "react-native";
 import { renderWithProviders } from "@test/render";
@@ -11,7 +12,9 @@ import {
   InlineError,
   Money,
   NumberField,
+  Screen,
   StatusBadge,
+  Text,
   Switch,
   ToastHost,
   clearToasts,
@@ -59,6 +62,31 @@ describe("NumberField", () => {
     );
     await fireEvent.changeText(screen.getByLabelText("Workers"), "1,250");
     expect(onChange).toHaveBeenLastCalledWith(1250);
+  });
+});
+
+describe("Screen", () => {
+  const scrollerProps = async (screenEl: ReactElement) => {
+    const { container } = await renderWithProviders(screenEl);
+    return container.queryAll((node) => node.type === "RCTScrollView")[0]?.props;
+  };
+
+  it("makes room for the keyboard, so a form's lower fields and Save can be reached", async () => {
+    const props = await scrollerProps(
+      <Screen>
+        <Text>Form</Text>
+      </Screen>,
+    );
+    expect(props?.automaticallyAdjustKeyboardInsets).toBe(true);
+  });
+
+  it("leaves it to a KeyboardAvoidingView the screen sits in", async () => {
+    const props = await scrollerProps(
+      <Screen keyboardInsets={false}>
+        <Text>Sign in</Text>
+      </Screen>,
+    );
+    expect(props?.automaticallyAdjustKeyboardInsets).toBe(false);
   });
 });
 
