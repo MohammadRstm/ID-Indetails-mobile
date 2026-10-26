@@ -73,12 +73,15 @@ function scheduleWake(records: OutboxRecord[]) {
 }
 
 async function runOnce(current: Engine) {
-  const records = (await allRecords())
+  const queued = (await allRecords())
     .filter((r) => r.userId === current.userId && isDue(r, Date.now()))
     .sort((a, b) => a.createdAt - b.createdAt);
 
-  for (const record of records) {
+  for (const { id } of queued) {
     if (engine !== current || paused) return;
+    // Read again: while earlier records were sending, this one may have been edited or discarded.
+    const record = (await allRecords()).find((r) => r.id === id);
+    if (!record || !isDue(record, Date.now())) continue;
     await saveRecord({ ...record, status: "sending", updatedAt: Date.now() });
     const outcome = await sendRecord(record);
     const next = nextState(record, outcome, Date.now());

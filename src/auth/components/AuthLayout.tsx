@@ -20,7 +20,7 @@ export function AuthLayout({ title, sub, companyName, logoUri, children }: AuthL
       style={styles.fill}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Screen edges={["top", "bottom", "left", "right"]}>
+      <Screen edges={["top", "bottom", "left", "right"]} keyboardInsets={false}>
         <View style={styles.card}>
           <View style={styles.brand}>
             <BrandMark logoUri={logoUri} />

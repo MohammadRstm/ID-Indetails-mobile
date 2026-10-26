@@ -19,6 +19,11 @@ type ScreenProps = {
   scrollRef?: Ref<ScrollView>;
   /** The person started scrolling by hand. */
   onScrollBeginDrag?: () => void;
+  /**
+   * On iPhone, the scrolling content makes room for the keyboard and brings the focused field above it (default
+   * on). Off for a screen inside its own KeyboardAvoidingView, which would make room twice.
+   */
+  keyboardInsets?: boolean;
   /** The content's side and top padding (default on). */
   padded?: boolean;
   /** Which edges keep clear of the notch and home indicator. Tab screens leave the bottom to the tab bar. */
@@ -35,6 +40,7 @@ export function Screen({
   onRefresh,
   scrollRef,
   onScrollBeginDrag,
+  keyboardInsets = true,
   padded = true,
   edges = ["top", "left", "right"],
 }: ScreenProps) {
@@ -46,6 +52,7 @@ export function Screen({
       style={styles.fill}
       contentContainerStyle={[padded && styles.padded, styles.scrollContent]}
       keyboardShouldPersistTaps="handled"
+      automaticallyAdjustKeyboardInsets={keyboardInsets}
       refreshControl={
         onRefresh ? (
           <RefreshControl

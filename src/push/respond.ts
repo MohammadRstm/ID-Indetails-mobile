@@ -21,7 +21,10 @@ export type ResponseContext = {
 };
 
 export async function respondToNotification(
-  response: Pick<Notifications.NotificationResponse, "actionIdentifier" | "notification">,
+  response: Pick<
+    Notifications.NotificationResponse,
+    "actionIdentifier" | "notification" | "userText"
+  >,
   ctx: ResponseContext,
 ): Promise<void> {
   const raw: unknown = response.notification.request.content.data;
@@ -35,6 +38,6 @@ export async function respondToNotification(
 
   const data = parsePushData(raw);
   if (!data || !isForMe(data, ctx.userId)) return;
-  if (await handleNotificationAction(response.actionIdentifier, data)) return;
+  if (await handleNotificationAction(response.actionIdentifier, data, response.userText)) return;
   ctx.navigate(routeForTarget(data.target, ctx.perms) ?? "/alerts");
 }

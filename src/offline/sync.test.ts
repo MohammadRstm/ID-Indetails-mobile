@@ -164,6 +164,37 @@ describe("labour weeks", () => {
     await waitFor(async () => expect((await mine())[0].status).toBe("sent"));
     expect(bodies.map((b) => b.expectedVersion)).toEqual(["0", "1700"]);
   });
+
+  it("sends a week's newer edit made while an earlier record was sending", async () => {
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    const bodies: { days: { workers: number }[] }[] = [];
+    server.use(
+      http.post(api("/projects/7/materials"), async () => {
+        await held;
+        return HttpResponse.json([]);
+      }),
+      http.put(api("/projects/7/labour-weeks/2026-10-05"), async ({ request }) => {
+        bodies.push((await request.json()) as { days: { workers: number }[] });
+        return HttpResponse.json({});
+      }),
+    );
+    await addMaterials(4, 7, materials(["Cement"]));
+    // The week is saved after the materials, so it waits behind them.
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    await putLabourWeek(4, 7, "2026-10-05", week(3));
+    stop = startSyncEngine(4, createQueryClient());
+    const kind = async (k: "materials" | "labour_week") => (await mine()).find((r) => r.kind === k);
+    await waitFor(async () => expect((await kind("materials"))?.status).toBe("sending"));
+
+    await putLabourWeek(4, 7, "2026-10-05", week(5));
+    release();
+
+    await waitFor(async () => expect((await kind("labour_week"))?.status).toBe("sent"));
+    expect(bodies).toHaveLength(1);
+    expect(bodies[0].days).toMatchObject([{ workers: 5 }]);
+    expect((await kind("labour_week"))?.payload).toMatchObject({ days: [{ workers: 5 }] });
+  });
 });
 
 describe("owners", () => {

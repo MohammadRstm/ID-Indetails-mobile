@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { AccessibilityInfo } from "react-native";
 import { renderWithProviders } from "@test/render";
@@ -10,7 +11,10 @@ import {
   Icon,
   InlineError,
   Money,
+  NumberField,
+  Screen,
   StatusBadge,
+  Text,
   Switch,
   ToastHost,
   clearToasts,
@@ -31,6 +35,58 @@ describe("Button", () => {
     await rerender(<Button label="Save" onPress={onPress} loading />);
     await fireEvent.press(screen.getByRole("button", { name: "Save" }));
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("NumberField", () => {
+  it("reads a decimal comma from the keypad as the decimal mark, and commas beside a dot as thousands", async () => {
+    const onChange = jest.fn();
+    await renderWithProviders(<NumberField label="Amount" value={null} onChange={onChange} />);
+    const field = screen.getByLabelText("Amount");
+    const typed = async (text: string) => {
+      await fireEvent.changeText(field, text);
+      return onChange.mock.lastCall?.[0];
+    };
+    expect(await typed("12,5")).toBe(12.5);
+    expect(await typed("1250,50")).toBe(1250.5);
+    expect(await typed("12,")).toBe(12);
+    expect(await typed("1,250.50")).toBe(1250.5);
+    expect(await typed("1,250,000")).toBe(1250000);
+    expect(await typed("12.5")).toBe(12.5);
+  });
+
+  it("keeps commas as thousands in a whole-number field, whose keypad has no decimal key", async () => {
+    const onChange = jest.fn();
+    await renderWithProviders(
+      <NumberField label="Workers" value={null} onChange={onChange} decimals={0} />,
+    );
+    await fireEvent.changeText(screen.getByLabelText("Workers"), "1,250");
+    expect(onChange).toHaveBeenLastCalledWith(1250);
+  });
+});
+
+describe("Screen", () => {
+  const scrollerProps = async (screenEl: ReactElement) => {
+    const { container } = await renderWithProviders(screenEl);
+    return container.queryAll((node) => node.type === "RCTScrollView")[0]?.props;
+  };
+
+  it("makes room for the keyboard, so a form's lower fields and Save can be reached", async () => {
+    const props = await scrollerProps(
+      <Screen>
+        <Text>Form</Text>
+      </Screen>,
+    );
+    expect(props?.automaticallyAdjustKeyboardInsets).toBe(true);
+  });
+
+  it("leaves it to a KeyboardAvoidingView the screen sits in", async () => {
+    const props = await scrollerProps(
+      <Screen keyboardInsets={false}>
+        <Text>Sign in</Text>
+      </Screen>,
+    );
+    expect(props?.automaticallyAdjustKeyboardInsets).toBe(false);
   });
 });
 

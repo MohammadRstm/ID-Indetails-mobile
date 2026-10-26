@@ -10,7 +10,7 @@ What the phone does for Design employees and Execution site staff, and how its m
 | Today (Execution) | Site staff | Pending-records banner, Add materials, my sites (last recorded), this week's labour status per site, open requirements |
 | Work | `work_entry:create` + `view_own` | The week (bars, a day's entries, every entry by day), overtime by month, the hours balance |
 | Entry | `work_entry:view_own` | One entry with its photo and comments; edit and delete with Undo while `canEdit` |
-| Log work | `work_entry:create` + `view_own` | Project, day, start and end, description, one photo; the API's overtime preview; "Use a timer instead" |
+| Log work | `work_entry:create` + `view_own` | Project, day, start and end, description, one photo; the API's overtime preview; "Use a timer instead" while no timer runs |
 | My pay | `work_entry:view_own` | A month's hours as pay counts them, day by day, and its excuses. **No amounts**: salary stays on the web |
 | Sites | `material:create` or `:manage` | Open sites, the ones recorded on most recently first |
 | Materials, Add materials | the same | A site's materials (read, paged, no costs); the Add materials sheet |
