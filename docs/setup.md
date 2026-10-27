@@ -253,6 +253,7 @@ The last argument is the web client's folder (its `node_modules` must be install
 | What you see | Try |
 |---|---|
 | The app says the server can't be reached | Open `<EXPO_PUBLIC_API_URL>/health` in the device's browser. If that fails: is the API running with `--urls http://0.0.0.0:5164`? Is the firewall rule there, and the network *Private*? Is the phone on the same Wi-Fi? |
+| The app says the server can't be reached, but the API runs and `/health` opens on the PC | The API was started with its **https** launch profile (for example from Visual Studio). It then redirects port 5164 to `https://…:7187`, whose development certificate the phone doesn't trust. Start it with the **http** profile (section 4, step 4; in Visual Studio, pick *http* next to ▶). The website's dev server expects the https profile: give it `HOURLINE_API=http://localhost:5164` meanwhile |
 | Sign-in answers "Something went wrong" | The API's database probably lacks the branch's migrations (section 4, step 3). The API's console shows the error |
 | The app still uses the old API address | Restart Metro with `npx expo start --clear` |
 | `adb devices` lists nothing | Another cable or USB port; the Samsung USB driver; USB debugging on |
