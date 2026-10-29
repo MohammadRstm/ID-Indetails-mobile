@@ -33,8 +33,9 @@ export function ensureAndroidChannels(): Promise<void> {
       Notifications.setNotificationChannelAsync(channel.id, {
         name: channel.name,
         importance: channel.importance,
-        // The timer and quiet hours make no sound.
-        sound: channel.importance === LOW ? null : "default",
+        // The timer and quiet hours make no sound. Android reads any other `sound` as a sound file in the app,
+        // so the rest leave it out to get the phone's default sound.
+        ...(channel.importance === LOW ? { sound: null } : {}),
       }),
     ),
   )
