@@ -43,7 +43,8 @@ The background (why development builds, why no Mac) is in [phase-0-plan.md](phas
 | **Node.js 24** (with npm) | Runs Expo and the tooling | nodejs.org, the LTS installer. The repo pins it in `.nvmrc`. Check with `node -v` |
 | **Git** | The code | Already installed |
 | **VS Code** with the *Expo Tools* and *ESLint* extensions | Editing | Extensions panel |
-| **Android Studio** | The Android SDK, `adb`, the emulator and Java 17 | developer.android.com/studio |
+| **Android Studio** | The Android SDK, `adb` and the emulator | developer.android.com/studio |
+| **Java 17** (Microsoft Build of OpenJDK) | Builds the Android app. Android Studio's own Java is newer, and the build fails on it | `winget install Microsoft.OpenJDK.17` |
 | **An Expo account** (free) | Cloud builds, push credentials | expo.dev → Sign up |
 | **EAS CLI** | Cloud builds and store uploads | `npm install -g eas-cli`, then `eas login` |
 | **Samsung USB driver** | Only if `adb devices` doesn't list the phone | samsung.com → Android USB Driver for Windows |
@@ -56,16 +57,19 @@ The background (why development builds, why no Mac) is in [phase-0-plan.md](phas
    - **SDK Platforms:** tick the newest Android version (the one Expo SDK 57 targets).
    - **SDK Tools:** tick *Android SDK Build-Tools*, *Android SDK Platform-Tools*, *Android Emulator* and *Android SDK Command-line Tools*.
    - Apply.
-3. Tell Windows where the SDK and Java are. In **PowerShell** (one time; then open a new terminal):
+3. Tell Windows where the SDK and Java 17 are. In **PowerShell** (one time; then open a new terminal):
 
    ```powershell
    [Environment]::SetEnvironmentVariable("ANDROID_HOME", "$env:LOCALAPPDATA\Android\Sdk", "User")
-   [Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Android\Android Studio\jbr", "User")
+   $jdk = (Get-ChildItem "C:\Program Files\Microsoft" -Directory -Filter "jdk-17*" | Select-Object -Last 1).FullName
+   [Environment]::SetEnvironmentVariable("JAVA_HOME", $jdk, "User")
    $path = [Environment]::GetEnvironmentVariable("Path", "User")
    [Environment]::SetEnvironmentVariable("Path", "$path;$env:LOCALAPPDATA\Android\Sdk\platform-tools;$env:LOCALAPPDATA\Android\Sdk\emulator", "User")
    ```
 
-4. In a **new** terminal, check: `adb version` and `java -version` both answer.
+   `JAVA_HOME` must not point at Android Studio's own Java (its `jbr` folder). That Java is newer than 17, and the build's native step fails on Java 24 and later. Android Studio itself keeps using its own Java.
+
+4. In a **new** PowerShell, check: `adb version` answers, and `& "$env:JAVA_HOME\bin\java" -version` says `17`.
 
 ## 3. Get the app's code
 
@@ -249,9 +253,11 @@ The last argument is the web client's folder (its `node_modules` must be install
 | What you see | Try |
 |---|---|
 | The app says the server can't be reached | Open `<EXPO_PUBLIC_API_URL>/health` in the device's browser. If that fails: is the API running with `--urls http://0.0.0.0:5164`? Is the firewall rule there, and the network *Private*? Is the phone on the same Wi-Fi? |
+| The app says the server can't be reached, but the API runs and `/health` opens on the PC | The API was started with its **https** launch profile (for example from Visual Studio). It then redirects port 5164 to `https://…:7187`, whose development certificate the phone doesn't trust. Start it with the **http** profile (section 4, step 4; in Visual Studio, pick *http* next to ▶). The website's dev server expects the https profile: give it `HOURLINE_API=http://localhost:5164` meanwhile |
 | Sign-in answers "Something went wrong" | The API's database probably lacks the branch's migrations (section 4, step 3). The API's console shows the error |
 | The app still uses the old API address | Restart Metro with `npx expo start --clear` |
 | `adb devices` lists nothing | Another cable or USB port; the Samsung USB driver; USB debugging on |
 | `npx expo run:android` can't find the SDK or Java | `ANDROID_HOME` and `JAVA_HOME` (section 2), in a new terminal |
+| The build fails at `configureCMakeDebug` with `WARNING: A restricted method in java.lang.System has been called` | Gradle ran on a Java newer than 17, usually Android Studio's own. Point `JAVA_HOME` at Java 17 (section 2), run `android\gradlew --stop`, then build again in a new terminal |
 | The development build can't find Metro | The PC and phone on the same Wi-Fi, port 8081 allowed through the firewall; or `npx expo start --tunnel` |
 | Fingerprint unlock isn't offered | The phone needs a screen lock and at least one fingerprint or face set up; then turn it on in More → Settings |
