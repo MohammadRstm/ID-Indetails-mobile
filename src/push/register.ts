@@ -9,7 +9,8 @@ import { ensureAndroidChannels } from "./channels";
 /*
  * This phone's push registration (phase-0-plan.md section 8): after sign-in, once the OS permission is granted,
  * the Expo push token is registered for the session with `PUT /api/me/devices`, and again whenever Expo issues a
- * new one. Signing out ends the session, which removes the device on the server.
+ * new one. Signing out ends the session, which removes the device on the server; a sign-out the API didn't hear
+ * about is finished later (src/auth/unfinishedSignOuts.ts).
  */
 
 export type PushState = "registered" | "denied" | "undetermined" | "unavailable";

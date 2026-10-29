@@ -8,7 +8,7 @@ import { env } from "@/config/env";
  * Invoice and statement PDFs (phase-0-plan.md section 12): downloaded with the bearer token into the cache, then
  * handed to the phone's share sheet. The token travels only in the request header, never in the address.
  * Downloading records nothing on the server; the caller records a delivery once the person says it went out.
- * The files live in the cache's "documents" folder; the cache is cleared on sign-out (CLAUDE.md section 9).
+ * The files live in the cache's "documents" folder, deleted on sign-out (CLAUDE.md section 9).
  */
 
 const DOCUMENTS = "documents";
@@ -46,6 +46,12 @@ export async function downloadPdf(path: string, fileName: string): Promise<File>
     }
   }
   return target;
+}
+
+/** Deletes every downloaded invoice and statement: the person signed out. */
+export async function deleteDownloadedPdfs(): Promise<void> {
+  const folder = new Directory(Paths.cache, DOCUMENTS);
+  if (folder.exists) folder.delete();
 }
 
 /** Opens the share sheet for a downloaded PDF. Resolves once the sheet is closed. */

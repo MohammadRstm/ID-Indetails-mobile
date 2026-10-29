@@ -16,6 +16,7 @@ import { clearToasts } from "@/ui/toast";
 import { authApi } from "./authApi";
 import { runSignOutCleanups, type SignOutCause } from "./signOutCleanup";
 import { tokenManager } from "./tokenManager";
+import { signOutOnServer, useFinishSignOuts } from "./unfinishedSignOuts";
 import { cacheUser, forgetCachedUser, readCachedUser } from "./userCache";
 
 /*
@@ -101,6 +102,7 @@ export function SessionProvider({ children, initialUser }: SessionProviderProps)
       : { status: "loading", user: null, signedInWith: null, notice: null },
   );
   const signedIn = state.status === "signedIn";
+  useFinishSignOuts();
 
   const me = useQuery({
     queryKey: meQueryKey,
@@ -199,13 +201,8 @@ export function SessionProvider({ children, initialUser }: SessionProviderProps)
 
   const signOut = useCallback(async () => {
     const refreshToken = await tokenManager.getRefreshToken();
-    if (refreshToken) {
-      try {
-        await authApi.logout(refreshToken);
-      } catch {
-        // On a phone the intent to leave wins; the token dies on its own after 30 days.
-      }
-    }
+    // On a phone the intent to leave wins: a sign-out the API didn't hear about is finished later.
+    if (refreshToken) await signOutOnServer(refreshToken);
     await tokenManager.clearSession();
     setState(SIGNED_OUT);
     await clearPersonalState(queryClient, "signedOut");

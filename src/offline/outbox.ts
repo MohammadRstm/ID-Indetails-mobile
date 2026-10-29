@@ -201,6 +201,12 @@ export async function deleteRecords(ids: string[]): Promise<void> {
   await reloadOutbox();
 }
 
+/** Signing out: the person's sent records go, kept only to show as Sent. Unsent ones stay theirs to send. */
+export async function deleteSentRecords(userId: number): Promise<void> {
+  const sent = (await allRecords()).filter((r) => r.userId === userId && r.status === "sent");
+  await deleteRecords(sent.map((r) => r.id));
+}
+
 function fresh(userId: number, projectId: number, now: number) {
   return {
     id: randomUUID(),

@@ -2,6 +2,8 @@ import * as SecureStore from "expo-secure-store";
 import { toApiError } from "@/api/errors";
 import type { MobileAuthResponse } from "@/api/mobileTypes";
 import { authApi } from "./authApi";
+import { TOKEN_STORE_OPTIONS as STORE_OPTIONS } from "./secureStoreOptions";
+import { signOutOnServer } from "./unfinishedSignOuts";
 
 /*
  * The session's tokens (phase-0-plan.md section 6).
@@ -18,9 +20,6 @@ import { authApi } from "./authApi";
  */
 
 const REFRESH_TOKEN_KEY = "idi.refreshToken";
-const STORE_OPTIONS: SecureStore.SecureStoreOptions = {
-  keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
-};
 
 /**
  * The waits before each new try of a refresh that got no answer. With the 30-second request timeout, the last
@@ -116,6 +115,8 @@ async function runRefresh(): Promise<string | null> {
   try {
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, auth.refreshToken, STORE_OPTIONS);
   } catch {
+    // The API holds a session this phone can't keep: it is ended there too.
+    void signOutOnServer(auth.refreshToken);
     return end("storage_failed");
   }
   if (generation !== started) return null;

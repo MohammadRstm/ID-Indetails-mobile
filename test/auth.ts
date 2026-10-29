@@ -5,6 +5,9 @@ import { personas } from "./personas";
 /** Where the token manager keeps the refresh token in the secure store. */
 export const REFRESH_TOKEN_KEY = "idi.refreshToken";
 
+/** The refresh tokens of sign-outs the API hasn't heard about yet, as a JSON list. */
+export const UNFINISHED_SIGN_OUTS_KEY = "idi.unfinishedSignOuts";
+
 /** A mobile sign-in or refresh answer, as the API sends it. */
 export function authResponse(
   change: Partial<Omit<MobileAuthResponse, "user">> & { user?: CurrentUser } = {},

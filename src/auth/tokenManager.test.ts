@@ -1,3 +1,4 @@
+import { waitFor } from "@testing-library/react-native";
 import { delay, http, HttpResponse } from "msw";
 import { isApiError } from "@/api/errors";
 import { authResponse, REFRESH_TOKEN_KEY } from "@test/auth";
@@ -84,8 +85,15 @@ describe("tokenManager.refresh", () => {
     });
   });
 
-  it("ends the session when the new token can't be stored", async () => {
+  it("ends the session, on the API too, when the new token can't be stored", async () => {
     refreshCounter();
+    const loggedOut: unknown[] = [];
+    server.use(
+      http.post(api("/mobile/auth/logout"), async ({ request }) => {
+        loggedOut.push(await request.json());
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
     const ended = jest.fn();
     const stop = tokenManager.onSessionEnded(ended);
     setItemAsync.mockRejectedValueOnce(new Error("keystore unavailable"));
@@ -94,6 +102,7 @@ describe("tokenManager.refresh", () => {
     expect(tokenManager.getAccessToken()).toBeNull();
     expect(secureStoreItems.has(REFRESH_TOKEN_KEY)).toBe(false);
     expect(ended).toHaveBeenCalledWith("storage_failed");
+    await waitFor(() => expect(loggedOut).toEqual([{ refreshToken: "refresh-2" }]));
     stop();
   });
 

@@ -4,7 +4,7 @@ import Storage from "expo-sqlite/kv-store";
 import { http, HttpResponse } from "msw";
 import { Pressable, Text } from "react-native";
 import { P } from "@/permissions/codes";
-import { authResponse, REFRESH_TOKEN_KEY } from "@test/auth";
+import { authResponse, REFRESH_TOKEN_KEY, UNFINISHED_SIGN_OUTS_KEY } from "@test/auth";
 import { api } from "@test/handlers";
 import { secureStoreItems } from "@test/mocks/secureStore";
 import { personas, withPermissions } from "@test/personas";
@@ -173,6 +173,29 @@ describe("signing out", () => {
     await fireEvent.press(screen.getByText("sign out"));
     await screen.findByText("signedOut");
     expect(presented).toEqual({ refreshToken: "mine" });
+    expect(secureStoreItems.has(UNFINISHED_SIGN_OUTS_KEY)).toBe(false);
+  });
+
+  it("finishes a sign-out the API didn't hear about at the next start, so its pushes stop", async () => {
+    await tokenManager.setSession(authResponse({ refreshToken: "mine" }));
+    server.use(http.post(api("/mobile/auth/logout"), () => HttpResponse.error()));
+    const offline = await renderWithProviders(<SessionProbe />);
+    await fireEvent.press(screen.getByText("sign out"));
+    await screen.findByText("signedOut");
+    expect(secureStoreItems.has(REFRESH_TOKEN_KEY)).toBe(false);
+    expect(secureStoreItems.get(UNFINISHED_SIGN_OUTS_KEY)).toBe(JSON.stringify(["mine"]));
+    await offline.unmount();
+
+    const presented: unknown[] = [];
+    server.use(
+      http.post(api("/mobile/auth/logout"), async ({ request }) => {
+        presented.push(await request.json());
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    await renderWithProviders(<SessionProbe />, { persona: null });
+    await waitFor(() => expect(secureStoreItems.has(UNFINISHED_SIGN_OUTS_KEY)).toBe(false));
+    expect(presented).toEqual([{ refreshToken: "mine" }]);
   });
 
   it("runs the registered clean-ups, saying the person chose to leave", async () => {
